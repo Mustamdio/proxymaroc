@@ -6,7 +6,7 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// ربط ملفات الواجهة الأمامية (Frontend) من مجلد public
+// ربط ملفات الواجهة الأمامية (Frontend) من مجلد public أو المجلد الحالي
 app.use(express.static(__dirname));
 
 // الاتصال بقاعدة بيانات MongoDB
@@ -45,7 +45,7 @@ const User = mongoose.model('User', userSchema);
 
 // ==================== المسارات (API Routes) ====================
 
-// أ. مسار التسجيل السريع (Username & Password فقط)
+// أ. مسار التسجيل (API & Form Compatible)
 app.post('/api/register', async (req, res) => {
     try {
         const { username, password, packSize } = req.body;
@@ -70,7 +70,7 @@ app.post('/api/register', async (req, res) => {
     }
 });
 
-// ب. مسار تسجيل الدخول
+// ب. مسار تسجيل الدخول (API)
 app.post('/api/login', async (req, res) => {
     try {
         const { username, password } = req.body;
@@ -86,7 +86,40 @@ app.post('/api/login', async (req, res) => {
     }
 });
 
-// ج. جلب بيانات لوحة تحكم المستخدم
+// ج. مسارات الدعم التقليدي للـ Forms (إذا تم إرسال الطلب مباشرة عبر المتصفح دون Fetch)
+app.post('/register', async (req, res) => {
+    try {
+        const { username, password } = req.body;
+        const existingUser = await User.findOne({ username });
+        if (existingUser) {
+            return res.status(400).send("اسم المستخدم مستخدم مسبقاً.");
+        }
+        const newUser = new User({ username, password });
+        await newUser.save();
+        // التوجيه المباشر للوحة التحكم مع تمرير الـ ID
+        res.redirect(`/dashboard.html?id=${newUser._id}`);
+    } catch (err) {
+        res.status(500).send("خطأ في التسجيل: " + err.message);
+    }
+});
+
+app.post('/login', async (req, res) => {
+    try {
+        const { username, password } = req.body;
+        const user = await User.findOne({ username, password });
+        if (!user) {
+            return res.status(400).send("بيانات الدخول غير صحيحة.");
+        }
+        if (username === 'admin') {
+            return res.redirect('/admin.html');
+        }
+        res.redirect(`/dashboard.html?id=${user._id}`);
+    } catch (err) {
+        res.status(500).send("خطأ في تسجيل الدخول: " + err.message);
+    }
+});
+
+// د. جلب بيانات لوحة تحكم المستخدم
 app.get('/api/user/:id', async (req, res) => {
     try {
         const user = await User.findById(req.params.id);
@@ -107,7 +140,7 @@ app.get('/api/user/:id', async (req, res) => {
     }
 });
 
-// د. عملية الشراء وتوزيع الأيبيهات تلقائياً من الأماكن (من 1 إلى 8)
+// هـ. عملية الشراء وتوزيع الأيبيهات تلقائياً من الأماكن (من 1 إلى 8)
 app.post('/api/buy/:id', async (req, res) => {
     try {
         const user = await User.findById(req.params.id);
@@ -146,7 +179,7 @@ app.post('/api/buy/:id', async (req, res) => {
         user.assignedIps = availableIps.map(i => i.ipAddress);
         user.assignedPool = targetPool.poolNumber;
         user.poolVersionWhenAssigned = targetPool.version;
-        user.paymentStatus = 'paid'; // افتراضياً (أو تتركه pending إذا كنت ستؤكد يدوياً)
+        user.paymentStatus = 'paid'; 
         await user.save();
 
         res.json({ success: true, message: "تمت عملية الشراء بنجاح! يمكنك تحميل ملف الأيبيهات الآن." });
@@ -155,7 +188,7 @@ app.post('/api/buy/:id', async (req, res) => {
     }
 });
 
-// هـ. تحميل ملف الأيبيهات `.txt`
+// و. تحميل ملف الأيبيهات `.txt`
 app.get('/api/download-ips/:id', async (req, res) => {
     try {
         const user = await User.findById(req.params.id);
@@ -220,9 +253,8 @@ app.post('/api/admin/user-action', async (req, res) => {
 // 3. إعادة تحميل/شحن الأيبيهات في مكان معين (Pool Restock) وتحديث النسخة
 app.post('/api/admin/restock-pool', async (req, res) => {
     try {
-        const { poolNumber, ipsText } = req.body; // ipsText: الأيبيهات مفصولة بأسطر جديدة
+        const { poolNumber, ipsText } = req.body; 
         
-        // تحويل النص إلى مصفوفة أيبيهات جديدة
         const ipList = ipsText.split('\n')
             .map(ip => ip.trim())
             .filter(ip => ip.length > 0)
@@ -231,14 +263,12 @@ app.post('/api/admin/restock-pool', async (req, res) => {
         let pool = await Pool.findOne({ poolNumber });
         
         if (!pool) {
-            // إنشاء المكان إذا لم يكن موجوداً
             pool = new Pool({
                 poolNumber,
                 ips: ipList,
                 version: 1
             });
         } else {
-            // تحديث الأيبيهات وزيادة رقم النسخة ليظهر تنبيه للعملاء القدامى
             pool.ips = ipList;
             pool.version += 1;
         }
