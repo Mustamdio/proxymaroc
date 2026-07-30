@@ -175,14 +175,14 @@
             <!-- قسم إظهار معلومات الحساب وزر النسخ بعد التسجيل -->
             <div id="successBox" class="hidden mt-4 p-4 bg-slate-950 border border-emerald-500/30 rounded-xl text-center space-y-3">
                 <div class="text-emerald-400 font-bold text-sm">تم إنشاء الحساب بنجاح وتخزينه في القاعدة!</div>
-                <div class="text-xs text-slate-300 bg-slate-900 p-2 rounded border border-slate-800" id="credentialsText"></div>
+                <div class="text-xs text-slate-300 bg-slate-900 p-2 rounded border border-slate-800 select-all" id="credentialsText"></div>
                 <div class="flex items-center justify-between gap-2">
-                    <button onclick="copyCredentials()" class="flex-1 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold py-2 px-3 rounded-lg text-sm transition flex items-center justify-center gap-2">
+                    <button type="button" onclick="copyCredentials()" class="flex-1 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold py-2 px-3 rounded-lg text-sm transition flex items-center justify-center gap-2">
                         <i class="fa-regular fa-copy"></i> نسخ المعلومات
                     </button>
                 </div>
                 <p class="text-xs text-amber-400 font-medium">⚠️ احتفظ بمعلوماتك في مكان آمن!</p>
-                <button id="goToDashBtn" class="w-full mt-2 bg-slate-800 hover:bg-slate-700 text-white font-bold py-2 rounded-lg text-sm transition">الانتقال إلى لوحة التحكم</button>
+                <button type="button" id="goToDashBtn" class="w-full mt-2 bg-slate-800 hover:bg-slate-700 text-white font-bold py-2 rounded-lg text-sm transition">الانتقال إلى لوحة التحكم</button>
             </div>
         </div>
     </div>
@@ -282,7 +282,15 @@
             const text = document.getElementById('credentialsText').innerText;
             navigator.clipboard.writeText(text).then(() => {
                 alert('تم نسخ المعلومات بنجاح!');
+            }).catch(err => {
+                console.error('Failed to copy text: ', err);
             });
+        }
+
+        // دالة تسجيل الخروج من الواجهة الأمامية
+        function logoutUser() {
+            localStorage.removeItem('userId');
+            window.location.href = '/logout';
         }
     </script>
 </body>
