@@ -141,7 +141,7 @@
             <h2 class="text-2xl font-bold text-white mb-6">تسجيل الدخول</h2>
             <form action="/login" method="POST" class="space-y-4">
                 <div>
-                    <label class="block text-sm text-slate-400 mb-1">البريد الإلكتروني أو اسم المستخدم</label>
+                    <label class="block text-sm text-slate-400 mb-1">اسم المستخدم</label>
                     <input type="text" name="username" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-emerald-500">
                 </div>
                 <div>
@@ -153,30 +153,40 @@
         </div>
     </div>
 
-    <!-- نافذة إنشاء حساب المنبثقة (Modal) -->
+    <!-- نافذة إنشاء حساب المنبثقة (Modal) مع زر النسخ والتنبيه -->
     <div id="registerModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
         <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 w-full max-w-md relative text-right shadow-2xl">
             <button onclick="closeModal('registerModal')" class="absolute top-4 left-4 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
             <h2 class="text-2xl font-bold text-white mb-6">إنشاء حساب جديد</h2>
-            <form action="/register" method="POST" class="space-y-4">
+            
+            <!-- نموذج التسجيل -->
+            <form id="registerForm" onsubmit="handleRegister(event)" class="space-y-4">
                 <div>
                     <label class="block text-sm text-slate-400 mb-1">اسم المستخدم</label>
-                    <input type="text" name="username" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-emerald-500">
-                </div>
-                <div>
-                    <label class="block text-sm text-slate-400 mb-1">البريد الإلكتروني</label>
-                    <input type="email" name="email" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-emerald-500">
+                    <input type="text" id="regUsername" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-emerald-500">
                 </div>
                 <div>
                     <label class="block text-sm text-slate-400 mb-1">كلمة المرور</label>
-                    <input type="password" name="password" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-emerald-500">
+                    <input type="password" id="regPassword" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-emerald-500">
                 </div>
                 <button type="submit" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold py-3 rounded-xl transition shadow-lg shadow-emerald-500/20">تسجيل</button>
             </form>
+
+            <!-- قسم إظهار معلومات الحساب وزر النسخ بعد التسجيل -->
+            <div id="successBox" class="hidden mt-4 p-4 bg-slate-950 border border-emerald-500/30 rounded-xl text-center space-y-3">
+                <div class="text-emerald-400 font-bold text-sm">تم إنشاء الحساب بنجاح!</div>
+                <div class="text-xs text-slate-300 bg-slate-900 p-2 rounded border border-slate-800" id="credentialsText"></div>
+                <div class="flex items-center justify-between gap-2">
+                    <button onclick="copyCredentials()" class="flex-1 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold py-2 px-3 rounded-lg text-sm transition flex items-center justify-center gap-2">
+                        <i class="fa-regular fa-copy"></i> نسخ المعلومات
+                    </button>
+                </div>
+                <p class="text-xs text-amber-400 font-medium">⚠️ احتفظ بمعلوماتك في مكان آمن!</p>
+            </div>
         </div>
     </div>
 
-    <!-- سكربت التحكم في المظهر والنوافذ -->
+    <!-- سكربت التحكم -->
     <script>
         function toggleTheme() {
             const body = document.getElementById('bodyTag');
@@ -200,8 +210,31 @@
         }
 
         function closeModal(modalId) {
-            document.getElementById(modalId).classList.remove('flex');
+            document.getElementById(modalId).classList.remove('hidden', 'flex');
             document.getElementById(modalId).classList.add('hidden');
+            // إعادة تعيين نموذج التسجيل عند الإغلاق
+            document.getElementById('registerForm').classList.remove('hidden');
+            document.getElementById('successBox').classList.add('hidden');
+        }
+
+        // دالة محاكاة التسجيل وإظهار زر النسخ والرسالة التحذيرية
+        function handleRegister(event) {
+            event.preventDefault();
+            const username = document.getElementById('regUsername').value;
+            const password = document.getElementById('regPassword').value;
+
+            // إخفاء النموذج وإظهار خانة النسخ مع المعلومات
+            document.getElementById('registerForm').classList.add('hidden');
+            document.getElementById('credentialsText').innerText = `اسم المستخدم: ${username} | كلمة المرور: ${password}`;
+            document.getElementById('successBox').classList.remove('hidden');
+        }
+
+        // دالة نسخ المعلومات للحافظة
+        function copyCredentials() {
+            const text = document.getElementById('credentialsText').innerText;
+            navigator.clipboard.writeText(text).then(() => {
+                alert('تم نسخ المعلومات بنجاح!');
+            });
         }
     </script>
 </body>
