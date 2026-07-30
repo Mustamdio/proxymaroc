@@ -1,0 +1,14 @@
+{
+  "name": "proxy-store",
+  "version": "1.0.0",
+  "description": "Local proxy sales platform without traffic monitoring",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "mongoose": "^8.3.1",
+    "dotenv": "^16.4.5"
+  }
+}
