@@ -1,92 +1,26 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لوحة تحكم الأدمن - ProxyMaroc</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-</head>
-<body class="bg-slate-950 text-slate-100 font-sans min-h-screen">
-
-    <!-- Header -->
-    <header class="w-full border-b border-slate-800 bg-slate-900/50 px-6 py-4 flex items-center justify-between">
-        <div class="flex items-center space-x-reverse space-x-3">
-            <div class="bg-emerald-500 text-slate-950 p-2 rounded-xl font-bold">
-                <i class="fa-solid fa-shield-halved"></i>
-            </div>
-            <span class="font-bold text-lg text-white">لوحة تحكم المشرف (Admin Panel)</span>
-        </div>
-        <button onclick="logout()" class="bg-red-500/10 text-red-400 text-xs px-3 py-2 rounded-xl border border-red-500/20 hover:bg-red-500/20 transition">
-            <i class="fa-solid fa-right-from-bracket ml-1"></i> خروج
-        </button>
-    </header>
-
-    <main class="max-w-7xl mx-auto px-6 py-10 space-y-10">
-
-        <!-- قسم شحن الأماكن (Pools Restock) -->
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-6">
-            <h2 class="text-xl font-bold text-white flex items-center gap-2">
-                <i class="fa-solid fa-server text-emerald-400"></i> إدارة وشحن الأماكن (Pools 1 to 8)
-            </h2>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div>
-                    <label class="block text-sm text-slate-400 mb-2">رقم المكان (من 1 إلى 8):</label>
-                    <input type="number" id="poolNumberInput" min="1" max="8" value="1" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500">
-                </div>
-                <div class="md:col-span-2">
-                    <label class="block text-sm text-slate-400 mb-2">قائمة الأيبيهات (كل إيبي في سطر):</label>
-                    <textarea id="ipsTextInput" rows="4" placeholder="192.168.1.1&#10;192.168.1.2" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white font-mono text-xs focus:outline-none focus:border-emerald-500"></textarea>
-                </div>
-            </div>
-            <button onclick="restockPool()" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold px-6 py-3 rounded-xl transition shadow-lg shadow-emerald-500/20">
-                <i class="fa-solid fa-upload ml-1"></i> شحن المكان وتحديث النسخة (Restock)
-            </button>
-        </div>
-
-        <!-- قسم حالة الأماكن الحالية -->
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
-            <h2 class="text-xl font-bold text-white">حالة الأماكن الحالية في النظام</h2>
-            <div id="poolsGrid" class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <!-- يتم تعبئتها تلقائياً -->
-            </div>
-        </div>
-
-        <!-- جدول الأعضاء المسجلين -->
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
-            <h2 class="text-xl font-bold text-white">إدارة الأعضاء والاشتراكات</h2>
-            <div class="overflow-x-auto">
-                <table class="w-full text-right text-sm">
-                    <thead class="bg-slate-950 text-slate-400 border-b border-slate-800">
-                        <tr>
-                            <th class="p-3">اسم المستخدم</th>
-                            <th class="p-3">الباقة</th>
-                            <th class="p-3">المكان المرتبط</th>
-                            <th class="p-3">حالة الدفع</th>
-                            <th class="p-3">الحالة</th>
-                            <th class="p-3">الإجراءات</th>
-                        </tr>
-                    </thead>
-                    <tbody id="usersTableBody" class="divide-y divide-slate-800/50">
-                        <!-- يتم جلب الأعضاء هنا -->
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-    </main>
-
-    <script>
-        // التحقق من أن المستخدم أدمن
-        const userId = localStorage.getItem('proxyUserId');
-        if (!userId) {
-            window.location.href = 'index.html';
-        }
-
-        async function loadAdminData() {
+<script>
+        // التحقق من أن المستخدم أدمن عبر جلب بيانات الجلسة من السيرفر أولاً
+        async function checkAdminAuth() {
             try {
                 const res = await fetch('/api/admin/data');
                 const data = await res.json();
+                if (!data.success) {
+                    window.location.href = 'index.html';
+                } else {
+                    loadAdminData(data);
+                }
+            } catch (err) {
+                window.location.href = 'index.html';
+            }
+        }
+
+        async function loadAdminData(initialData = null) {
+            try {
+                let data = initialData;
+                if (!data) {
+                    const res = await fetch('/api/admin/data');
+                    data = await res.json();
+                }
 
                 if (data.success) {
                     // تعبئة جدول الأعضاء
@@ -152,10 +86,9 @@
 
         function logout() {
             localStorage.removeItem('proxyUserId');
-            window.location.href = 'index.html';
+            window.location.href = '/logout';
         }
 
-        loadAdminData();
+        // تشغيل التحقق عند تحميل الصفحة
+        checkAdminAuth();
     </script>
-</body>
-</html>
