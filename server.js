@@ -7,7 +7,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // ربط ملفات الواجهة الأمامية (Frontend) من مجلد public
-app.use(express.static('public'));
+app.use(express.static(__dirname));
 
 // الاتصال بقاعدة بيانات MongoDB
 const MONGO_URI = process.env.MONGO_URI || "mongodb://localhost:27017/proxy-store";
