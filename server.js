@@ -55,7 +55,7 @@ const User = mongoose.model('User', userSchema);
 app.get('/logout', (req, res) => {
     req.session.destroy((err) => {
         res.clearCookie('connect.sid'); 
-        res.redirect('/login.html'); 
+        res.redirect('/index.html'); 
     });
 });
 
@@ -235,12 +235,16 @@ app.get('/api/download-ips/:id', async (req, res) => {
 
 // ==================== لوحة تحكم الأدمن (Admin APIs) ====================
 
-// Middleware للتأكد واش المستخدم Admin بصح
+// Middleware للتأكد واش المستخدم Admin بصح عبر الجلسة
 function isAdminAuth(req, res, next) {
     if (req.session && req.session.user && req.session.user.isAdmin === true) {
         return next(); 
     }
-    res.redirect('/login.html'); 
+    // إذا لم يكن مشرفاً، قم بإرجاعه لصفحة البداية أو خطأ في الـ API
+    if (req.xhr || req.headers.accept.indexOf('json') > -1) {
+        return res.status(403).json({ success: false, message: "غير مصرح لك بالوصول" });
+    }
+    res.redirect('/index.html'); 
 }
 
 app.get('/api/admin/data', isAdminAuth, async (req, res) => {
@@ -311,9 +315,9 @@ app.post('/api/admin/restock-pool', isAdminAuth, async (req, res) => {
     }
 });
 
-// حماية مسار صفحة الأدمن بالكامل
+// حماية مسار صفحة الأدمن بالكامل وإرجاع الملف من الجذر الرئيسي
 app.get('/admin.html', isAdminAuth, (req, res) => {
-    res.sendFile(__dirname + '/public/admin.html');
+    res.sendFile(__dirname + '/admin.html');
 });
 
 // تشغيل السيرفر
