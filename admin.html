@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة تحكم الأدمن - Admin Panel</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-900 text-white font-sans">
+
+    <div class="container mx-auto px-4 py-10 max-w-6xl">
+        <div class="flex justify-between items-center mb-8 bg-gray-800 p-4 rounded-lg">
+            <h1 class="text-2xl font-bold text-red-400">لوحة تحكم الأدمن المسيطرة</h1>
+            <button onclick="logout()" class="bg-red-600 hover:bg-red-500 px-4 py-2 rounded text-sm">تسجيل الخروج</button>
+        </div>
+
+        <!-- قسم شحن الأماكن (Pool Restock) الأماكن من 1 إلى 8 -->
+        <div class="bg-gray-800 p-6 rounded-lg mb-8 shadow">
+            <h2 class="text-xl font-semibold mb-4 text-blue-400">شحن الأماكن (Pools 1 to 8) وإعادة التحميل</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div>
+                    <label class="block text-sm mb-2">اختر رقم المكان (Slot)</label>
+                    <select id="poolNumber" class="w-full bg-gray-700 border border-gray-600 rounded p-2 text-white">
+                        <option value="1">المكان رقم 1</option>
+                        <option value="2">المكان رقم 2</option>
+                        <option value="3">المكان رقم 3</option>
+                        <option value="4">المكان رقم 4</option>
+                        <option value="5">المكان رقم 5</option>
+                        <option value="6">المكان رقم 6</option>
+                        <option value="7">المكان رقم 7</option>
+                        <option value="8">المكان رقم 8</option>
+                    </select>
+                </div>
+            </div>
+            <div class="mb-4">
+                <label class="block text-sm mb-2">ضع الأيبيهات الجديدة (كل آبي في سطر مستقل):</label>
+                <textarea id="ipsText" rows="6" class="w-full bg-gray-700 border border-gray-600 rounded p-2 text-white font-mono text-sm" placeholder="192.168.1.1:8080&#10;192.168.1.2:8080"></textarea>
+            </div>
+            <button onclick="restockPool()" class="bg-green-600 hover:bg-green-500 px-6 py-2 rounded font-bold">شحن المكان وتحديث النسخة 🚀</button>
+        </div>
+
+        <!-- جدول الأعضاء المسجلين -->
+        <div class="bg-gray-800 p-6 rounded-lg shadow">
+            <h2 class="text-xl font-semibold mb-4 text-blue-400">إدارة الأعضاء والطلبات</h2>
+            <div class="overflow-x-auto">
+                <table class="w-full text-right border-collapse">
+                    <thead>
+                        <tr class="bg-gray-700 text-gray-300 border-b border-gray-600">
+                            <th class="p-3">اسم المستخدم</th>
+                            <th class="p-3">الباقة</th>
+                            <th class="p-3">المكان المسحوب منه</th>
+                            <th class="p-3">الحالة</th>
+                            <th class="p-3">الإجراءات والتحكم</th>
+                        </tr>
+                    </thead>
+                    <tbody id="usersTableBody">
+                        <!-- يتم تعبئتها ديناميكياً -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const userId = localStorage.getItem('userId');
+        if (!userId) window.location.href = 'index.html';
+
+        async function loadAdminData() {
+            const res = await fetch('/api/admin/data');
+            const data = await res.json();
+            
+            if (data.success) {
+                const tbody = document.getElementById('usersTableBody');
+                tbody.innerHTML = '';
+
+                data.users.forEach(user => {
+                    const tr = document.createElement('tr');
+                    tr.className = "border-b border-gray-700 hover:bg-gray-750";
+                    tr.innerHTML = `
+                        <td class="p-3 font-bold">${user.username}</td>
+                        <td class="p-3">${user.selectedPack} IP</td>
+                        <td class="p-3">${user.assignedPool ? 'مكان رقم ' + user.assignedPool : 'لم يشتري بعد'}</td>
+                        <td class="p-3"><span class="px-2 py-1 rounded text-xs ${user.status === 'active' ? 'bg-green-600' : 'bg-red-600'}">${user.status}</span></td>
+                        <td class="p-3 space-x-2 space-x-reverse">
+                            <button onclick="toggleStatus('${user._id}')" class="bg-yellow-600 hover:bg-yellow-500 px-2 py-1 rounded text-xs">توقيف/تفعيل</button>
+                            <button onclick="changePackPrompt('${user._id}')" class="bg-blue-600 hover:bg-blue-500 px-2 py-1 rounded text-xs">تغيير الباقة</button>
+                            <button onclick="deleteUser('${user._id}')" class="bg-red-600 hover:bg-red-500 px-2 py-1 rounded text-xs">مسح</button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            }
+        }
+
+        async function restockPool() {
+            const poolNumber = document.getElementById('poolNumber').value;
+            const ipsText = document.getElementById('ipsText').value;
+
+            if (!ipsText.trim()) {
+                alert('الرجاء إدخال الأيبيهات أولاً!');
+                return;
+            }
+
+            const res = await fetch('/api/admin/restock-pool', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ poolNumber: parseInt(poolNumber), ipsText })
+            });
+
+            const data = await res.json();
+            alert(data.message);
+            if (data.success) {
+                document.getElementById('ipsText').value = '';
+            }
+        }
+
+        async function toggleStatus(targetUserId) {
+            await fetch('/api/admin/user-action', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userId: targetUserId, action: 'toggle-status' })
+            });
+            loadAdminData();
+        }
+
+        async function deleteUser(targetUserId) {
+            if (confirm('هل أنت متأكد من مسح هذا العضو نهائياً؟')) {
+                await fetch('/api/admin/user-action', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userId: targetUserId, action: 'delete' })
+                });
+                loadAdminData();
+            }
+        }
+
+        async function changePackPrompt(targetUserId) {
+            const newPack = prompt('أدخل عدد الأيبيهات الجديد للباقة (مثلاً 200 أو 500):');
+            if (newPack) {
+                await fetch('/api/admin/user-action', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userId: targetUserId, action: 'change-pack', newPack: parseInt(newPack) })
+                });
+                loadAdminData();
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('userId');
+            window.location.href = 'index.html';
+        }
+
+        loadAdminData();
+    </script>
+</body>
+</html>
