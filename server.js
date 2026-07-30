@@ -54,7 +54,10 @@ const User = mongoose.model('User', userSchema);
 // ==================== مسار تسجيل الخروج (Logout) ====================
 app.get('/logout', (req, res) => {
     req.session.destroy((err) => {
-        res.clearCookie('connect.sid'); 
+        // مسح الكوكي نهائياً مع تحديد المسار لمنع بقاء الجلسة معلقة
+        res.clearCookie('connect.sid', { path: '/', httpOnly: true, secure: false }); 
+        // منع المتصفح من عمل Cache للصفحة المحمية بعد الخروج
+        res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, private');
         res.redirect('/index.html'); 
     });
 });
