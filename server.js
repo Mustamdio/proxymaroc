@@ -1,10 +1,19 @@
 const express = require('express');
 const mongoose = require('mongoose');
+const session = require('express-session');
 require('dotenv').config();
 
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// إعداد الجلسات (Sessions)
+app.use(session({
+    secret: process.env.SESSION_SECRET || 'proxy-store-secret-key-2026',
+    resave: false,
+    saveUninitialized: false,
+    cookie: { maxAge: 24 * 60 * 60 * 1000 } // جلسة تدوم لمدة يوم كامل
+}));
 
 // ربط ملفات الواجهة الأمامية (Frontend) من المجلد الحالي
 app.use(express.static(__dirname));
@@ -17,25 +26,23 @@ mongoose.connect(MONGO_URI)
 
 // ==================== النماذج (Models) ====================
 
-// 1. نموذج الأماكن والمخزون (Pools 1 to 8)
 const poolSchema = new mongoose.Schema({
-    poolNumber: { type: Number, required: true, unique: true }, // رقم المكان (1 إلى 8)
+    poolNumber: { type: Number, required: true, unique: true },
     ips: [{ 
         ipAddress: String, 
         isUsed: { type: Boolean, default: false } 
     }],
-    version: { type: Number, default: 1 } // رقم النسخة للإشعارات
+    version: { type: Number, default: 1 }
 });
 const Pool = mongoose.model('Pool', poolSchema);
 
-// 2. نموذج المستخدمين (Users) مع إضافة حماية isAdmin الحقيقية
 const userSchema = new mongoose.Schema({
     username: { type: String, required: true, unique: true },
     password: { type: String, required: true },
-    isAdmin: { type: Boolean, default: false }, // حماية صريحة للأدمن من قاعدة البيانات
-    selectedPack: { type: Number, default: 0 }, // عدد الأيبيهات المختارة
-    assignedPool: { type: Number, default: null }, // المكان الذي سُحبت منه الأيبيهات
-    assignedIps: [String], // أرشيف الأيبيهات الخاصة بهذا المستخدم
+    isAdmin: { type: Boolean, default: false },
+    selectedPack: { type: Number, default: 0 },
+    assignedPool: { type: Number, default: null },
+    assignedIps: [String],
     poolVersionWhenAssigned: { type: Number, default: 1 },
     status: { type: String, enum: ['active', 'banned'], default: 'active' },
     paymentStatus: { type: String, enum: ['pending', 'paid'], default: 'pending' },
@@ -44,20 +51,26 @@ const userSchema = new mongoose.Schema({
 const User = mongoose.model('User', userSchema);
 
 
+// ==================== مسار تسجيل الخروج (Logout) ====================
+app.get('/logout', (req, res) => {
+    req.session.destroy((err) => {
+        res.clearCookie('connect.sid'); 
+        res.redirect('/login.html'); 
+    });
+});
+
+
 // ==================== المسارات (API Routes) ====================
 
-// أ. مسار التسجيل عبر Fetch API
 app.post('/api/register', async (req, res) => {
     try {
         const { username, password, packSize } = req.body;
         
-        // التحقق هل الاسم موجود مسبقاً
         const existingUser = await User.findOne({ username });
         if (existingUser) {
             return res.status(400).json({ success: false, message: "اسم المستخدم مستخدم مسبقاً، اختر اسماً آخر." });
         }
 
-        // إنشاء المستخدم الجديد وتخزينه في MongoDB (دائماً isAdmin يكون false افتراضياً)
         const newUser = new User({
             username,
             password,
@@ -72,7 +85,6 @@ app.post('/api/register', async (req, res) => {
     }
 });
 
-// ب. مسار تسجيل الدخول عبر Fetch API مع التحقق الآمن من حقل isAdmin
 app.post('/api/login', async (req, res) => {
     try {
         const { username, password } = req.body;
@@ -82,7 +94,13 @@ app.post('/api/login', async (req, res) => {
             return res.status(400).json({ success: false, message: "اسم المستخدم أو كلمة المرور غير صحيحة." });
         }
 
-        // إرجاع حالة isAdmin الحقيقية المسجلة في القاعدة للمستخدم
+        // تخزين المستخدم في الجلسة
+        req.session.user = {
+            id: user._id,
+            username: user.username,
+            isAdmin: user.isAdmin
+        };
+
         res.json({ 
             success: true, 
             userId: user._id, 
@@ -93,7 +111,7 @@ app.post('/api/login', async (req, res) => {
     }
 });
 
-// ج. مسارات الدعم للنماذج التقليدية (Forms)
+// مسارات النماذج التقليدية (Forms)
 app.post('/register', async (req, res) => {
     try {
         const { username, password } = req.body;
@@ -103,6 +121,8 @@ app.post('/register', async (req, res) => {
         }
         const newUser = new User({ username, password, isAdmin: false });
         await newUser.save();
+        
+        req.session.user = { id: newUser._id, username: newUser.username, isAdmin: newUser.isAdmin };
         res.redirect(`/dashboard.html?id=${newUser._id}`);
     } catch (err) {
         res.status(500).send("خطأ في التسجيل: " + err.message);
@@ -116,7 +136,13 @@ app.post('/login', async (req, res) => {
         if (!user) {
             return res.status(400).send("بيانات الدخول غير صحيحة.");
         }
-        // التوجيه بناءً على صلاحية الأدمن في قاعدة البيانات وليس فقط بالاسم
+
+        req.session.user = {
+            id: user._id,
+            username: user.username,
+            isAdmin: user.isAdmin
+        };
+
         if (user.isAdmin) {
             return res.redirect('/admin.html');
         }
@@ -126,7 +152,6 @@ app.post('/login', async (req, res) => {
     }
 });
 
-// د. جلب بيانات لوحة تحكم المستخدم
 app.get('/api/user/:id', async (req, res) => {
     try {
         const user = await User.findById(req.params.id);
@@ -146,7 +171,6 @@ app.get('/api/user/:id', async (req, res) => {
     }
 });
 
-// هـ. عملية الشراء وتوزيع الأيبيهات تلقائياً من الأماكن (من 1 إلى 8)
 app.post('/api/buy/:id', async (req, res) => {
     try {
         const user = await User.findById(req.params.id);
@@ -191,7 +215,6 @@ app.post('/api/buy/:id', async (req, res) => {
     }
 });
 
-// و. تحميل ملف الأيبيهات `.txt`
 app.get('/api/download-ips/:id', async (req, res) => {
     try {
         const user = await User.findById(req.params.id);
@@ -212,10 +235,16 @@ app.get('/api/download-ips/:id', async (req, res) => {
 
 // ==================== لوحة تحكم الأدمن (Admin APIs) ====================
 
-// 1. جلب جميع المستخدمين والأماكن للأدمن
-app.get('/api/admin/data', async (req, res) => {
+// Middleware للتأكد واش المستخدم Admin بصح
+function isAdminAuth(req, res, next) {
+    if (req.session && req.session.user && req.session.user.isAdmin === true) {
+        return next(); 
+    }
+    res.redirect('/login.html'); 
+}
+
+app.get('/api/admin/data', isAdminAuth, async (req, res) => {
     try {
-        // جلب المستخدمين الذين ليسوا أدمن لعرضهم في الجدول
         const users = await User.find({ isAdmin: false });
         const pools = await Pool.find().sort({ poolNumber: 1 });
         res.json({ success: true, users, pools });
@@ -224,8 +253,7 @@ app.get('/api/admin/data', async (req, res) => {
     }
 });
 
-// 2. التحكم في المستخدمين
-app.post('/api/admin/user-action', async (req, res) => {
+app.post('/api/admin/user-action', isAdminAuth, async (req, res) => {
     try {
         const { userId, action, newPack } = req.body;
         
@@ -254,8 +282,7 @@ app.post('/api/admin/user-action', async (req, res) => {
     }
 });
 
-// 3. شحن الأيبيهات في مكان معين
-app.post('/api/admin/restock-pool', async (req, res) => {
+app.post('/api/admin/restock-pool', isAdminAuth, async (req, res) => {
     try {
         const { poolNumber, ipsText } = req.body; 
         
@@ -283,16 +310,8 @@ app.post('/api/admin/restock-pool', async (req, res) => {
         res.status(500).json({ success: false, error: error.message });
     }
 });
-// Middleware للتأكد واش المستخدم Admin
-function isAdminAuth(req, res, next) {
-    if (req.session && req.session.user && req.session.user.isAdmin === true) {
-        return next(); // إيلا كان أدمن، دوزه عادي
-    }
-    // إيلا ماكانش أدمن، رجعه لصفحة تسجيل الدخول أو داشبورد الكلاينت
-    res.redirect('/login.html'); 
-}
 
-// حماية مسار الـ Admin
+// حماية مسار صفحة الأدمن بالكامل
 app.get('/admin.html', isAdminAuth, (req, res) => {
     res.sendFile(__dirname + '/public/admin.html');
 });
