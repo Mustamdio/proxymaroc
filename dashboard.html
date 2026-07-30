@@ -3,116 +3,162 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لوحة تحكم المستخدم - Proxy Store</title>
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <title>لوحة التحكم - ProxyMaroc</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body class="bg-gray-900 text-white font-sans">
+<body class="bg-slate-950 text-slate-100 font-sans min-h-screen">
 
-    <div class="container mx-auto px-4 py-10 max-w-3xl">
-        <div class="flex justify-between items-center mb-8 bg-gray-800 p-4 rounded-lg">
-            <h1 class="text-xl font-bold">لوحة تحكم العضو</h1>
-            <button onclick="logout()" class="bg-red-600 hover:bg-red-500 px-3 py-1 rounded text-sm">تسجيل الخروج</button>
+    <!-- Navbar لوحة التحكم -->
+    <header class="w-full border-b border-slate-800/60 bg-slate-900/50 backdrop-blur-md px-6 py-4 flex items-center justify-between">
+        <div class="flex items-center space-x-reverse space-x-3">
+            <div class="bg-emerald-500 text-slate-950 p-2 rounded-xl flex items-center justify-center font-bold">
+                <i class="fa-solid fa-chart-line text-lg"></i>
+            </div>
+            <span class="font-bold text-lg text-white">لوحة تحكم العضو</span>
+        </div>
+        <div class="flex items-center space-x-reverse space-x-4">
+            <span id="usernameDisplay" class="text-sm text-slate-300 font-medium">جاري التحميل...</span>
+            <button onclick="logout()" class="bg-red-500/10 hover:bg-red-500/20 text-red-400 text-xs px-3 py-2 rounded-xl transition border border-red-500/20">
+                <i class="fa-solid fa-right-from-bracket ml-1"></i> خروج
+            </button>
+        </div>
+    </header>
+
+    <!-- المحتوى الرئيسي -->
+    <main class="max-w-4xl mx-auto px-6 py-10 space-y-6">
+        
+        <!-- تنبيه التحديثات إذا وجدت -->
+        <div id="updateAlert" class="hidden bg-amber-500/10 border border-amber-500/30 text-amber-400 p-4 rounded-2xl text-sm flex items-center justify-between">
+            <span><i class="fa-solid fa-triangle-exclamation ml-2"></i> تم تحديث الأيبيهات في المكان الخاص بك، يرجى إعادة الشراء أو التحميل للحصول على النسخة الجديدة.</span>
         </div>
 
-        <!-- تنبيه تحديث الأيبيهات إذا قام الأدمن بشحن المكان -->
-        <div id="updateAlert" class="hidden bg-yellow-600 text-black p-4 rounded-lg mb-6 font-bold text-center">
-            ⚠️ تنبيه: تم تحديث الأيبيهات في المكان الذي تستخدمه! يرجى تحميل القائمة الجديدة لأن القديمة توقفت عن العمل.
-        </div>
+        <!-- بطاقة معلومات الباقة -->
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
+            <h2 class="text-xl font-bold text-white mb-2">معلومات الاشتراك</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                <div class="bg-slate-950 p-4 rounded-xl border border-slate-800">
+                    <span class="text-slate-400 block mb-1">الباقة المحددة:</span>
+                    <span id="selectedPack" class="text-white font-bold text-base">0 IP</span>
+                </div>
+                <div class="bg-slate-950 p-4 rounded-xl border border-slate-800">
+                    <span class="text-slate-400 block mb-1">حالة الدفع:</span>
+                    <span id="paymentStatus" class="font-bold text-base">-</span>
+                </div>
+                <div class="bg-slate-950 p-4 rounded-xl border border-slate-800">
+                    <span class="text-slate-400 block mb-1">حالة الحساب:</span>
+                    <span id="accountStatus" class="font-bold text-base">-</span>
+                </div>
+            </div>
 
-        <!-- معلومات المستخدم (اسم المستخدم وكلمة المرور في الأعلى) -->
-        <div class="bg-gray-800 p-6 rounded-lg mb-6 shadow">
-            <h2 class="text-lg font-semibold mb-4 text-blue-400">بيانات الحساب</h2>
-            <div class="grid grid-cols-2 gap-4">
-                <div class="bg-gray-700 p-3 rounded">
-                    <span class="text-gray-400 block text-xs">اسم المستخدم:</span>
-                    <span id="lblUsername" class="font-bold text-lg">---</span>
-                </div>
-                <div class="bg-gray-700 p-3 rounded">
-                    <span class="text-gray-400 block text-xs">كلمة المرور:</span>
-                    <span class="font-bold text-lg">********</span>
-                </div>
+            <!-- أزرار العمليات -->
+            <div class="pt-4 flex flex-wrap gap-4">
+                <button onclick="buyProxies()" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold px-6 py-3 rounded-xl transition shadow-lg shadow-emerald-500/20 flex items-center gap-2">
+                    <i class="fa-solid fa-cart-shopping"></i> تأكيد الشراء وسحب الأيبيهات
+                </button>
+                <a id="downloadBtn" href="#" class="hidden bg-slate-800 hover:bg-slate-700 text-white font-bold px-6 py-3 rounded-xl transition flex items-center gap-2">
+                    <i class="fa-solid fa-download"></i> تحميل ملف البروكسيات (.txt)
+                </a>
             </div>
         </div>
 
-        <!-- الباقة المختارة وزر الشراء -->
-        <div class="bg-gray-800 p-6 rounded-lg mb-6 shadow text-center">
-            <h2 class="text-lg font-semibold mb-4 text-blue-400">الباقة المختارة</h2>
-            <p class="text-2xl font-bold mb-4">حزمة <span id="lblPack">0</span> IP</p>
-            
-            <div id="buySection">
-                <button onclick="buyPack()" class="bg-green-600 hover:bg-green-500 px-6 py-3 rounded-lg font-bold text-lg w-full">شراء وتأكيد الباقة</button>
-            </div>
-
-            <!-- معلومات الدفع والمحفظة -->
-            <div id="walletSection" class="hidden mt-6 bg-gray-700 p-4 rounded text-right">
-                <p class="text-sm mb-2 text-yellow-300">قم بتحويل المبلغ المطلوب إلى عنوان محفظة USDT (TRC20) التالية:</p>
-                <div class="bg-gray-900 p-3 rounded text-sm font-mono select-all mb-4 text-center text-green-400">
-                    TMu8n7W... (ضع عنوان محفظتك هنا)
-                </div>
-                <p id="paymentStatusMsg" class="text-sm text-gray-300">حالة الدفع: <span class="text-yellow-400 font-bold">في انتظار الشراء/التحميل</span></p>
+        <!-- قسم عرض الأيبيهات المسحوبة -->
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl">
+            <h2 class="text-xl font-bold text-white mb-4">الأيبيهات الخاصة بك</h2>
+            <div id="ipsContainer" class="bg-slate-950 border border-slate-800 rounded-xl p-4 h-48 overflow-y-auto font-mono text-xs text-emerald-400 space-y-1">
+                جاري التحميل أو لا توجد أيبيهات مسحوبة بعد...
             </div>
         </div>
 
-        <!-- زر تحميل ملف الأيبيهات (.txt) -->
-        <div id="downloadSection" class="hidden bg-gray-800 p-6 rounded-lg text-center shadow">
-            <h2 class="text-lg font-semibold mb-4 text-green-400">الملف جاهز للتحميل</h2>
-            <p class="text-sm text-gray-400 mb-4">تمت عملية الشراء بنجاح، يمكنك تحميل ملف الأيبيهات الخاص بك:</p>
-            <button onclick="downloadFile()" class="bg-blue-600 hover:bg-blue-500 px-6 py-3 rounded-lg font-bold text-lg">تحميل ملف الـ .txt 📥</button>
-        </div>
-    </div>
+    </main>
 
     <script>
-        const userId = localStorage.getItem('userId');
+        // استخراج الـ ID من الرابط أو التخزين المحلي
+        const urlParams = new URLSearchParams(window.location.search);
+        let userId = urlParams.get('id');
+
         if (!userId) {
-            window.location.href = 'index.html';
+            userId = localStorage.getItem('proxyUserId');
         }
 
+        if (!userId) {
+            alert("يرجى تسجيل الدخول أولاً.");
+            window.location.href = 'index.html';
+        } else {
+            localStorage.setItem('proxyUserId', userId);
+            loadUserData();
+        }
+
+        // جلب بيانات المستخدم من السيرفر
         async function loadUserData() {
-            const res = await fetch(`/api/user/${userId}`);
-            const data = await res.json();
-            
-            if (data.success) {
-                const user = data.user;
-                document.getElementById('lblUsername').innerText = user.username;
-                document.getElementById('lblPack').innerText = user.selectedPack;
+            try {
+                const res = await fetch(`/api/user/${userId}`);
+                const data = await res.json();
 
-                if (data.needsUpdate) {
-                    document.getElementById('updateAlert').classList.remove('hidden');
-                }
+                if (data.success) {
+                    const user = data.user;
+                    document.getElementById('usernameDisplay').innerText = user.username;
+                    document.getElementById('selectedPack').innerText = `${user.selectedPack} IP`;
+                    
+                    const payStatusEl = document.getElementById('paymentStatus');
+                    payStatusEl.innerText = user.paymentStatus === 'paid' ? 'مدفوع' : 'قيد الانتظار';
+                    payStatusEl.className = user.paymentStatus === 'paid' ? 'text-emerald-400 font-bold text-base' : 'text-amber-400 font-bold text-base';
 
-                if (user.paymentStatus === 'paid' || user.assignedIps.length > 0) {
-                    document.getElementById('buySection').style.display = 'none';
-                    document.getElementById('downloadSection').classList.remove('hidden');
+                    const accStatusEl = document.getElementById('accountStatus');
+                    accStatusEl.innerText = user.status === 'active' ? 'نشط' : 'محظور';
+                    accStatusEl.className = user.status === 'active' ? 'text-emerald-400 font-bold text-base' : 'text-red-400 font-bold text-base';
+
+                    if (data.needsUpdate) {
+                        document.getElementById('updateAlert').classList.remove('hidden');
+                    }
+
+                    // عرض الأيبيهات إن وجدت
+                    const ipsContainer = document.getElementById('ipsContainer');
+                    if (user.assignedIps && user.assignedIps.length > 0) {
+                        ipsContainer.innerHTML = user.assignedIps.map(ip => `<div>${ip}</div>`).join('');
+                        
+                        // إظهار زر التحميل
+                        const downloadBtn = document.getElementById('downloadBtn');
+                        downloadBtn.href = `/api/download-ips/${userId}`;
+                        downloadBtn.classList.remove('hidden');
+                    } else {
+                        ipsContainer.innerHTML = '<span class="text-slate-500">لم تقم بسحب أي أيبيهات بعد. انقر على زر الشراء أعلاه.</span>';
+                    }
+
+                } else {
+                    alert(data.message || "المستخدم غير موجود");
+                    window.location.href = 'index.html';
                 }
-            } else {
-                alert('حدث خطأ في تحميل البيانات');
-                logout();
+            } catch (err) {
+                console.error("خطأ في الاتصال:", err);
             }
         }
 
-        async function buyPack() {
-            const res = await fetch(`/api/buy/${userId}`, { method: 'POST' });
-            const data = await res.json();
-            
-            if (data.success) {
-                alert(data.message);
-                document.getElementById('walletSection').classList.remove('hidden');
-                loadUserData();
-            } else {
-                alert(data.message);
+        // تنفيذ عملية الشراء
+        async function buyProxies() {
+            try {
+                const res = await fetch(`/api/buy/${userId}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                const data = await res.json();
+
+                if (data.success) {
+                    alert(data.message);
+                    loadUserData(); // إعادة تحديث البيانات في الصفحة
+                } else {
+                    alert(data.message || "حدث خطأ أثناء عملية الشراء");
+                }
+            } catch (err) {
+                alert("خطأ في الاتصال بالخادم");
             }
         }
 
-        function downloadFile() {
-            window.location.href = `/api/download-ips/${userId}`;
-        }
-
+        // تسجيل الخروج
         function logout() {
-            localStorage.removeItem('userId');
+            localStorage.removeItem('proxyUserId');
             window.location.href = 'index.html';
         }
-
-        loadUserData();
     </script>
 </body>
 </html>
