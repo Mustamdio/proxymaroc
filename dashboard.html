@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة تحكم المستخدم - Proxy Store</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-900 text-white font-sans">
+
+    <div class="container mx-auto px-4 py-10 max-w-3xl">
+        <div class="flex justify-between items-center mb-8 bg-gray-800 p-4 rounded-lg">
+            <h1 class="text-xl font-bold">لوحة تحكم العضو</h1>
+            <button onclick="logout()" class="bg-red-600 hover:bg-red-500 px-3 py-1 rounded text-sm">تسجيل الخروج</button>
+        </div>
+
+        <!-- تنبيه تحديث الأيبيهات إذا قام الأدمن بشحن المكان -->
+        <div id="updateAlert" class="hidden bg-yellow-600 text-black p-4 rounded-lg mb-6 font-bold text-center">
+            ⚠️ تنبيه: تم تحديث الأيبيهات في المكان الذي تستخدمه! يرجى تحميل القائمة الجديدة لأن القديمة توقفت عن العمل.
+        </div>
+
+        <!-- معلومات المستخدم (اسم المستخدم وكلمة المرور في الأعلى) -->
+        <div class="bg-gray-800 p-6 rounded-lg mb-6 shadow">
+            <h2 class="text-lg font-semibold mb-4 text-blue-400">بيانات الحساب</h2>
+            <div class="grid grid-cols-2 gap-4">
+                <div class="bg-gray-700 p-3 rounded">
+                    <span class="text-gray-400 block text-xs">اسم المستخدم:</span>
+                    <span id="lblUsername" class="font-bold text-lg">---</span>
+                </div>
+                <div class="bg-gray-700 p-3 rounded">
+                    <span class="text-gray-400 block text-xs">كلمة المرور:</span>
+                    <span class="font-bold text-lg">********</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- الباقة المختارة وزر الشراء -->
+        <div class="bg-gray-800 p-6 rounded-lg mb-6 shadow text-center">
+            <h2 class="text-lg font-semibold mb-4 text-blue-400">الباقة المختارة</h2>
+            <p class="text-2xl font-bold mb-4">حزمة <span id="lblPack">0</span> IP</p>
+            
+            <div id="buySection">
+                <button onclick="buyPack()" class="bg-green-600 hover:bg-green-500 px-6 py-3 rounded-lg font-bold text-lg w-full">شراء وتأكيد الباقة</button>
+            </div>
+
+            <!-- معلومات الدفع والمحفظة -->
+            <div id="walletSection" class="hidden mt-6 bg-gray-700 p-4 rounded text-right">
+                <p class="text-sm mb-2 text-yellow-300">قم بتحويل المبلغ المطلوب إلى عنوان محفظة USDT (TRC20) التالية:</p>
+                <div class="bg-gray-900 p-3 rounded text-sm font-mono select-all mb-4 text-center text-green-400">
+                    TMu8n7W... (ضع عنوان محفظتك هنا)
+                </div>
+                <p id="paymentStatusMsg" class="text-sm text-gray-300">حالة الدفع: <span class="text-yellow-400 font-bold">في انتظار الشراء/التحميل</span></p>
+            </div>
+        </div>
+
+        <!-- زر تحميل ملف الأيبيهات (.txt) -->
+        <div id="downloadSection" class="hidden bg-gray-800 p-6 rounded-lg text-center shadow">
+            <h2 class="text-lg font-semibold mb-4 text-green-400">الملف جاهز للتحميل</h2>
+            <p class="text-sm text-gray-400 mb-4">تمت عملية الشراء بنجاح، يمكنك تحميل ملف الأيبيهات الخاص بك:</p>
+            <button onclick="downloadFile()" class="bg-blue-600 hover:bg-blue-500 px-6 py-3 rounded-lg font-bold text-lg">تحميل ملف الـ .txt 📥</button>
+        </div>
+    </div>
+
+    <script>
+        const userId = localStorage.getItem('userId');
+        if (!userId) {
+            window.location.href = 'index.html';
+        }
+
+        async function loadUserData() {
+            const res = await fetch(`/api/user/${userId}`);
+            const data = await res.json();
+            
+            if (data.success) {
+                const user = data.user;
+                document.getElementById('lblUsername').innerText = user.username;
+                document.getElementById('lblPack').innerText = user.selectedPack;
+
+                if (data.needsUpdate) {
+                    document.getElementById('updateAlert').classList.remove('hidden');
+                }
+
+                if (user.paymentStatus === 'paid' || user.assignedIps.length > 0) {
+                    document.getElementById('buySection').style.display = 'none';
+                    document.getElementById('downloadSection').classList.remove('hidden');
+                }
+            } else {
+                alert('حدث خطأ في تحميل البيانات');
+                logout();
+            }
+        }
+
+        async function buyPack() {
+            const res = await fetch(`/api/buy/${userId}`, { method: 'POST' });
+            const data = await res.json();
+            
+            if (data.success) {
+                alert(data.message);
+                document.getElementById('walletSection').classList.remove('hidden');
+                loadUserData();
+            } else {
+                alert(data.message);
+            }
+        }
+
+        function downloadFile() {
+            window.location.href = `/api/download-ips/${userId}`;
+        }
+
+        function logout() {
+            localStorage.removeItem('userId');
+            window.location.href = 'index.html';
+        }
+
+        loadUserData();
+    </script>
+</body>
+</html>
