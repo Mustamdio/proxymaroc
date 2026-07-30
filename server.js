@@ -283,6 +283,19 @@ app.post('/api/admin/restock-pool', async (req, res) => {
         res.status(500).json({ success: false, error: error.message });
     }
 });
+// Middleware للتأكد واش المستخدم Admin
+function isAdminAuth(req, res, next) {
+    if (req.session && req.session.user && req.session.user.isAdmin === true) {
+        return next(); // إيلا كان أدمن، دوزه عادي
+    }
+    // إيلا ماكانش أدمن، رجعه لصفحة تسجيل الدخول أو داشبورد الكلاينت
+    res.redirect('/login.html'); 
+}
+
+// حماية مسار الـ Admin
+app.get('/admin.html', isAdminAuth, (req, res) => {
+    res.sendFile(__dirname + '/public/admin.html');
+});
 
 // تشغيل السيرفر
 const PORT = process.env.PORT || 3000;
