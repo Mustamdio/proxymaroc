@@ -1,55 +1,133 @@
-<script>
-        // التحقق من أن المستخدم أدمن عبر جلب بيانات الجلسة من السيرفر أولاً
-        async function checkAdminAuth() {
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة تحكم الأدمن - ProxyMaroc</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-slate-950 text-slate-100 font-sans min-h-screen">
+
+    <!-- Header -->
+    <header class="w-full border-b border-slate-800 bg-slate-900/50 px-6 py-4 flex items-center justify-between">
+        <div class="flex items-center space-x-reverse space-x-3">
+            <div class="bg-emerald-500 text-slate-950 p-2 rounded-xl font-bold">
+                <i class="fa-solid fa-shield-halved"></i>
+            </div>
+            <span class="font-bold text-lg text-white">لوحة تحكم المشرف (Admin Panel)</span>
+        </div>
+        <button onclick="logout()" class="bg-red-500/10 text-red-400 text-xs px-3 py-2 rounded-xl border border-red-500/20 hover:bg-red-500/20 transition">
+            <i class="fa-solid fa-right-from-bracket ml-1"></i> خروج
+        </button>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-6 py-10 space-y-10">
+
+        <!-- قسم شحن الأماكن (Pools Restock) -->
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-6">
+            <h2 class="text-xl font-bold text-white flex items-center gap-2">
+                <i class="fa-solid fa-server text-emerald-400"></i> إدارة وشحن الأماكن (Pools 1 to 8)
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div>
+                    <label class="block text-sm text-slate-400 mb-2">رقم المكان (من 1 إلى 8):</label>
+                    <input type="number" id="poolNumberInput" min="1" max="8" value="1" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500">
+                </div>
+                <div class="md:col-span-2">
+                    <label class="block text-sm text-slate-400 mb-2">قائمة الأيبيهات (كل إيبي في سطر):</label>
+                    <textarea id="ipsTextInput" rows="4" placeholder="192.168.1.1&#10;192.168.1.2" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white font-mono text-xs focus:outline-none focus:border-emerald-500"></textarea>
+                </div>
+            </div>
+            <button onclick="restockPool()" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold px-6 py-3 rounded-xl transition shadow-lg shadow-emerald-500/20">
+                <i class="fa-solid fa-upload ml-1"></i> شحن المكان وتحديث النسخة (Restock)
+            </button>
+        </div>
+
+        <!-- قسم حالة الأماكن الحالية -->
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
+            <h2 class="text-xl font-bold text-white">حالة الأماكن الحالية في النظام</h2>
+            <div id="poolsGrid" class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="text-slate-500 text-sm">جاري تحميل الأماكن...</div>
+            </div>
+        </div>
+
+        <!-- جدول الأعضاء المسجلين -->
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
+            <h2 class="text-xl font-bold text-white">إدارة الأعضاء والاشتراكات</h2>
+            <div class="overflow-x-auto">
+                <table class="w-full text-right text-sm">
+                    <thead class="bg-slate-950 text-slate-400 border-b border-slate-800">
+                        <tr>
+                            <th class="p-3">اسم المستخدم</th>
+                            <th class="p-3">الباقة</th>
+                            <th class="p-3">المكان المرتبط</th>
+                            <th class="p-3">حالة الدفع</th>
+                            <th class="p-3">الحالة</th>
+                            <th class="p-3">الإجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody id="usersTableBody" class="divide-y divide-slate-800/50">
+                        <tr><td colspan="6" class="p-4 text-center text-slate-500">جاري تحميل الأعضاء...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        // التحقق من صلاحيات المشرف وجلب البيانات
+        async function loadAdminData() {
             try {
                 const res = await fetch('/api/admin/data');
-                const data = await res.json();
-                if (!data.success) {
+                
+                // إذا لم يكن مصرحاً له، سيقوم السيرفر بإرجاع خطأ أو إعادة توجيه
+                if (!res.ok) {
                     window.location.href = 'index.html';
-                } else {
-                    loadAdminData(data);
+                    return;
                 }
-            } catch (err) {
-                window.location.href = 'index.html';
-            }
-        }
 
-        async function loadAdminData(initialData = null) {
-            try {
-                let data = initialData;
-                if (!data) {
-                    const res = await fetch('/api/admin/data');
-                    data = await res.json();
-                }
+                const data = await res.json();
 
                 if (data.success) {
                     // تعبئة جدول الأعضاء
                     const tbody = document.getElementById('usersTableBody');
-                    tbody.innerHTML = data.users.map(user => `
-                        <tr class="hover:bg-slate-950/50">
-                            <td class="p-3 font-bold text-white">${user.username}</td>
-                            <td class="p-3">${user.selectedPack} IP</td>
-                            <td class="p-3">${user.assignedPool ? 'المكان ' + user.assignedPool : 'غير مرتبطة'}</td>
-                            <td class="p-3"><span class="${user.paymentStatus === 'paid' ? 'text-emerald-400' : 'text-amber-400'}">${user.paymentStatus}</span></td>
-                            <td class="p-3"><span class="${user.status === 'active' ? 'text-emerald-400' : 'text-red-400'}">${user.status}</span></td>
-                            <td class="p-3 space-x-reverse space-x-2">
-                                <span class="text-slate-500 text-xs">قريباً التحكم الكامل</span>
-                            </td>
-                        </tr>
-                    `).join('');
+                    if (data.users && data.users.length > 0) {
+                        tbody.innerHTML = data.users.map(user => `
+                            <tr class="hover:bg-slate-950/50">
+                                <td class="p-3 font-bold text-white">${user.username}</td>
+                                <td class="p-3">${user.selectedPack} IP</td>
+                                <td class="p-3">${user.assignedPool ? 'المكان ' + user.assignedPool : 'غير مرتبطة'}</td>
+                                <td class="p-3"><span class="${user.paymentStatus === 'paid' ? 'text-emerald-400' : 'text-amber-400'}">${user.paymentStatus}</span></td>
+                                <td class="p-3"><span class="${user.status === 'active' ? 'text-emerald-400' : 'text-red-400'}">${user.status}</span></td>
+                                <td class="p-3 space-x-reverse space-x-2">
+                                    <span class="text-slate-500 text-xs">قريباً التحكم الكامل</span>
+                                </td>
+                            </tr>
+                        `).join('');
+                    } else {
+                        tbody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-slate-500">لا يوجد أعضاء مسجلين حالياً.</td></tr>`;
+                    }
 
                     // عرض حالة الأماكن
                     const poolsGrid = document.getElementById('poolsGrid');
-                    poolsGrid.innerHTML = data.pools.map(pool => {
-                        const unusedCount = pool.ips.filter(i => !i.isUsed).length;
-                        return `
-                            <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-1">
-                                <div class="text-white font-bold">المكان رقم ${pool.poolNumber}</div>
-                                <div class="text-xs text-slate-400">المتاح: <span class="text-emerald-400 font-bold">${unusedCount}</span> IP</div>
-                                <div class="text-xs text-slate-500">النسخة: v${pool.version}</div>
-                            </div>
-                        `;
-                    }).join('');
+                    if (data.pools && data.pools.length > 0) {
+                        poolsGrid.innerHTML = data.pools.map(pool => {
+                            const unusedCount = pool.ips ? pool.ips.filter(i => !i.isUsed).length : 0;
+                            return `
+                                <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-1">
+                                    <div class="text-white font-bold">المكان رقم ${pool.poolNumber}</div>
+                                    <div class="text-xs text-slate-400">المتاح: <span class="text-emerald-400 font-bold">${unusedCount}</span> IP</div>
+                                    <div class="text-xs text-slate-500">النسخة: v${pool.version}</div>
+                                </div>
+                            `;
+                        }).join('');
+                    } else {
+                        poolsGrid.innerHTML = `<div class="text-slate-500 text-sm">لا توجد أماكن معرفة حالياً.</div>`;
+                    }
+                } else {
+                    window.location.href = 'index.html';
                 }
             } catch (err) {
                 console.error("خطأ في جلب بيانات الأدمن:", err);
@@ -89,6 +167,8 @@
             window.location.href = '/logout';
         }
 
-        // تشغيل التحقق عند تحميل الصفحة
-        checkAdminAuth();
+        // تشغيل الدالة عند تحميل الصفحة
+        loadAdminData();
     </script>
+</body>
+</html>
