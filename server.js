@@ -28,10 +28,11 @@ const poolSchema = new mongoose.Schema({
 });
 const Pool = mongoose.model('Pool', poolSchema);
 
-// 2. نموذج المستخدمين (Users)
+// 2. نموذج المستخدمين (Users) مع إضافة حماية isAdmin الحقيقية
 const userSchema = new mongoose.Schema({
     username: { type: String, required: true, unique: true },
     password: { type: String, required: true },
+    isAdmin: { type: Boolean, default: false }, // حماية صريحة للأدمن من قاعدة البيانات
     selectedPack: { type: Number, default: 0 }, // عدد الأيبيهات المختارة
     assignedPool: { type: Number, default: null }, // المكان الذي سُحبت منه الأيبيهات
     assignedIps: [String], // أرشيف الأيبيهات الخاصة بهذا المستخدم
@@ -56,10 +57,11 @@ app.post('/api/register', async (req, res) => {
             return res.status(400).json({ success: false, message: "اسم المستخدم مستخدم مسبقاً، اختر اسماً آخر." });
         }
 
-        // إنشاء المستخدم الجديد وتخزينه في MongoDB
+        // إنشاء المستخدم الجديد وتخزينه في MongoDB (دائماً isAdmin يكون false افتراضياً)
         const newUser = new User({
             username,
             password,
+            isAdmin: false, 
             selectedPack: packSize ? parseInt(packSize) : 0
         });
         await newUser.save();
@@ -70,7 +72,7 @@ app.post('/api/register', async (req, res) => {
     }
 });
 
-// ب. مسار تسجيل الدخول عبر Fetch API
+// ب. مسار تسجيل الدخول عبر Fetch API مع التحقق الآمن من حقل isAdmin
 app.post('/api/login', async (req, res) => {
     try {
         const { username, password } = req.body;
@@ -80,7 +82,12 @@ app.post('/api/login', async (req, res) => {
             return res.status(400).json({ success: false, message: "اسم المستخدم أو كلمة المرور غير صحيحة." });
         }
 
-        res.json({ success: true, userId: user._id, isAdmin: username === 'admin' });
+        // إرجاع حالة isAdmin الحقيقية المسجلة في القاعدة للمستخدم
+        res.json({ 
+            success: true, 
+            userId: user._id, 
+            isAdmin: user.isAdmin 
+        });
     } catch (error) {
         res.status(500).json({ success: false, error: error.message });
     }
@@ -94,7 +101,7 @@ app.post('/register', async (req, res) => {
         if (existingUser) {
             return res.status(400).send("اسم المستخدم مستخدم مسبقاً.");
         }
-        const newUser = new User({ username, password });
+        const newUser = new User({ username, password, isAdmin: false });
         await newUser.save();
         res.redirect(`/dashboard.html?id=${newUser._id}`);
     } catch (err) {
@@ -109,7 +116,8 @@ app.post('/login', async (req, res) => {
         if (!user) {
             return res.status(400).send("بيانات الدخول غير صحيحة.");
         }
-        if (username === 'admin') {
+        // التوجيه بناءً على صلاحية الأدمن في قاعدة البيانات وليس فقط بالاسم
+        if (user.isAdmin) {
             return res.redirect('/admin.html');
         }
         res.redirect(`/dashboard.html?id=${user._id}`);
@@ -207,7 +215,8 @@ app.get('/api/download-ips/:id', async (req, res) => {
 // 1. جلب جميع المستخدمين والأماكن للأدمن
 app.get('/api/admin/data', async (req, res) => {
     try {
-        const users = await User.find({ username: { $ne: 'admin' } });
+        // جلب المستخدمين الذين ليسوا أدمن لعرضهم في الجدول
+        const users = await User.find({ isAdmin: false });
         const pools = await Pool.find().sort({ poolNumber: 1 });
         res.json({ success: true, users, pools });
     } catch (error) {
