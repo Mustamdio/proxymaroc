@@ -3,167 +3,164 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>متجر البروكسيات - Proxy Store</title>
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-</head>
-<body class="bg-gray-900 text-white font-sans">
-
-    <div class="container mx-auto px-4 py-10">
-        <header class="text-center mb-12">
-            <h1 class="text-4xl font-bold mb-2">متجر بروكسيات محلية بدون ترافيك</h1>
-            <p class="text-gray-400">اختر الباقة المناسبة لك وسجل مباشرة بكل سهولة</p>
-        </header>
-
-        <!-- زر تسجيل الدخول للمسجلين مسبقاً -->
-        <div class="flex justify-end mb-6">
-            <button onclick="openLoginModal()" class="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded text-sm">تسجيل الدخول</button>
-        </div>
-
-        <!-- شبكة الباقات -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
-            <!-- باقة 50 IP -->
-            <div class="bg-gray-800 border border-gray-700 rounded-lg p-6 text-center">
-                <h3 class="text-xl font-semibold mb-4">50 IP</h3>
-                <p class="text-3xl font-bold text-green-400 mb-6">25 USDT</p>
-                <button onclick="selectPack(50)" class="w-full bg-blue-600 hover:bg-blue-500 py-2 rounded font-bold">شراء الباقة</button>
-            </div>
-            <!-- باقة 100 IP -->
-            <div class="bg-gray-800 border border-gray-700 rounded-lg p-6 text-center">
-                <h3 class="text-xl font-semibold mb-4">100 IP</h3>
-                <p class="text-3xl font-bold text-green-400 mb-6">40 USDT</p>
-                <button onclick="selectPack(100)" class="w-full bg-blue-600 hover:bg-blue-500 py-2 rounded font-bold">شراء الباقة</button>
-            </div>
-            <!-- باقة 200 IP -->
-            <div class="bg-gray-800 border border-gray-700 rounded-lg p-6 text-center">
-                <h3 class="text-xl font-semibold mb-4">200 IP</h3>
-                <p class="text-3xl font-bold text-green-400 mb-6">70 USDT</p>
-                <button onclick="selectPack(200)" class="w-full bg-blue-600 hover:bg-blue-500 py-2 rounded font-bold">شراء الباقة</button>
-            </div>
-            <!-- باقة 300 IP -->
-            <div class="bg-gray-800 border border-gray-700 rounded-lg p-6 text-center">
-                <h3 class="text-xl font-semibold mb-4">300 IP</h3>
-                <p class="text-3xl font-bold text-green-400 mb-6">100 USDT</p>
-                <button onclick="selectPack(300)" class="w-full bg-blue-600 hover:bg-blue-500 py-2 rounded font-bold">شراء الباقة</button>
-            </div>
-            <!-- باقة 400 IP -->
-            <div class="bg-gray-800 border border-gray-700 rounded-lg p-6 text-center">
-                <h3 class="text-xl font-semibold mb-4">400 IP</h3>
-                <p class="text-3xl font-bold text-green-400 mb-6">130 USDT</p>
-                <button onclick="selectPack(400)" class="w-full bg-blue-600 hover:bg-blue-500 py-2 rounded font-bold">شراء الباقة</button>
-            </div>
-            <!-- باقة 500 IP -->
-            <div class="bg-gray-800 border border-gray-700 rounded-lg p-6 text-center">
-                <h3 class="text-xl font-semibold mb-4">500 IP</h3>
-                <p class="text-3xl font-bold text-green-400 mb-6">170 USDT</p>
-                <button onclick="selectPack(500)" class="w-full bg-blue-600 hover:bg-blue-500 py-2 rounded font-bold">شراء الباقة</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- نافذة التسجيل السريع المنبثقة (Modal) -->
-    <div id="registerModal" class="hidden fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4">
-        <div class="bg-gray-800 p-6 rounded-lg max-w-md w-full relative">
-            <h2 id="modalTitle" class="text-2xl font-bold mb-4">إنشاء حساب جديد</h2>
-            <form id="registerForm" onsubmit="handleRegister(event)">
-                <div class="mb-4">
-                    <label class="block text-sm mb-2">اسم المستخدم (Username)</label>
-                    <input type="text" id="username" required class="w-full bg-gray-700 border border-gray-600 rounded p-2 text-white">
-                </div>
-                <div class="mb-4">
-                    <label class="block text-sm mb-2">كلمة المرور (Password)</label>
-                    <input type="password" id="password" required class="w-full bg-gray-700 border border-gray-600 rounded p-2 text-white">
-                </div>
-                <div class="flex justify-end space-x-2 space-x-reverse">
-                    <button type="button" onclick="closeModal()" class="bg-gray-600 px-4 py-2 rounded">إلغاء</button>
-                    <button type="submit" class="bg-green-600 hover:bg-green-500 px-4 py-2 rounded font-bold">تسجيل ومتابعة</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- نافذة تسجيل الدخول -->
-    <div id="loginModal" class="hidden fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4">
-        <div class="bg-gray-800 p-6 rounded-lg max-w-md w-full relative">
-            <h2 class="text-2xl font-bold mb-4">تسجيل الدخول</h2>
-            <form onsubmit="handleLogin(event)">
-                <div class="mb-4">
-                    <label class="block text-sm mb-2">اسم المستخدم</label>
-                    <input type="text" id="loginUser" required class="w-full bg-gray-700 border border-gray-600 rounded p-2 text-white">
-                </div>
-                <div class="mb-4">
-                    <label class="block text-sm mb-2">كلمة المرور</label>
-                    <input type="password" id="loginPass" required class="w-full bg-gray-700 border border-gray-600 rounded p-2 text-white">
-                </div>
-                <div class="flex justify-end space-x-2 space-x-reverse">
-                    <button type="button" onclick="closeLoginModal()" class="bg-gray-600 px-4 py-2 rounded">إلغاء</button>
-                    <button type="submit" class="bg-blue-600 hover:bg-blue-500 px-4 py-2 rounded font-bold">دخول</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
+    <title>ProxyMaroc - متجر بروكسيات محلية بدون ترافيك</title>
+    <!-- Tailwind CSS لتحقيق تصميم احترافي وسريع -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script>
-        let selectedPackSize = 0;
-
-        function selectPack(size) {
-            selectedPackSize = size;
-            document.getElementById('registerModal').classList.remove('hidden');
-        }
-
-        function closeModal() {
-            document.getElementById('registerModal').classList.add('hidden');
-        }
-
-        function openLoginModal() {
-            document.getElementById('loginModal').classList.remove('hidden');
-        }
-
-        function closeLoginModal() {
-            document.getElementById('loginModal').classList.add('hidden');
-        }
-
-        async function handleRegister(e) {
-            e.preventDefault();
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
-
-            const res = await fetch('/api/register', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username, password, packSize: selectedPackSize })
-            });
-
-            const data = await res.json();
-            if (data.success) {
-                alert('⚠️ تنبيه هام جداً:\nحفظ اسم المستخدم وكلمة المرور في مكان آمن! هذه هي وسيلتك الوحيدة للدخول للموقع.');
-                localStorage.setItem('userId', data.userId);
-                window.location.href = 'dashboard.html';
-            } else {
-                alert(data.message);
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        darkBg: '#0f172a',
+                        cardBg: '#1e293b',
+                        accentGreen: '#10b981'
+                    }
+                }
             }
         }
+    </script>
+</head>
+<body class="bg-slate-950 text-slate-100 font-sans min-h-screen transition-colors duration-300" id="bodyTag">
 
-        async function handleLogin(e) {
-            e.preventDefault();
-            const username = document.getElementById('loginUser').value;
-            const password = document.getElementById('loginPass').value;
+    <!-- Navbar الاحترافي الفوقي -->
+    <header class="w-full border-b border-slate-800/60 bg-slate-900/50 backdrop-blur-md sticky top-0 z-50 px-6 py-3 flex items-center justify-between">
+        
+        <!-- الجهة اليمنى: الشعار والأيقونة + روابط سريعة -->
+        <div class="flex items-center space-x-reverse space-x-8">
+            <!-- الشعار مع الأيقونة -->
+            <div class="flex items-center space-x-reverse space-x-3 cursor-pointer">
+                <div class="bg-emerald-500 text-slate-950 p-2 rounded-xl flex items-center justify-center font-bold shadow-lg shadow-emerald-500/20">
+                    <i class="fa-solid fa-shield-halved text-lg"></i>
+                </div>
+                <span class="font-bold text-lg tracking-wide text-white">ProxyMaroc</span>
+            </div>
 
-            const res = await fetch('/api/login', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username, password })
-            });
+            <!-- رابط تليجرام -->
+            <nav class="hidden md:flex items-center space-x-reverse space-x-6 text-sm text-slate-400">
+                <a href="https://t.me/YOUR_TELEGRAM" target="_blank" class="flex items-center space-x-reverse space-x-2 hover:text-emerald-400 transition">
+                    <i class="fa-brands fa-telegram text-emerald-400"></i>
+                    <span>تليجرام</span>
+                </a>
+            </nav>
+        </div>
 
-            const data = await res.json();
-            if (data.success) {
-                localStorage.setItem('userId', data.userId);
-                if (data.isAdmin) {
-                    window.location.href = 'admin.html';
-                } else {
-                    window.location.href = 'dashboard.html';
-                }
+        <!-- الجهة اليسرى: زر الثيم (ظلام/ضياء) + زر تسجيل الدخول وإنشاء حساب -->
+        <div class="flex items-center space-x-reverse space-x-4">
+            <!-- زر تغيير الوضع (Dark / Light) -->
+            <button onclick="toggleTheme()" class="bg-slate-800/80 hover:bg-slate-700 text-amber-400 p-2.5 rounded-xl border border-slate-700 transition" title="تغيير المظهر">
+                <i id="themeIcon" class="fa-solid fa-moon text-sm"></i>
+            </button>
+
+            <!-- زر تسجيل الدخول (بالعربية) -->
+            <a href="login.html" class="text-sm font-medium text-slate-300 hover:text-white px-3 py-2 transition">
+                تسجيل الدخول
+            </a>
+
+            <!-- زر إنشاء حساب (بالعربية) -->
+            <a href="register.html" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-sm font-bold px-4 py-2 rounded-xl transition shadow-lg shadow-emerald-500/20">
+                إنشاء حساب
+            </a>
+        </div>
+    </header>
+
+    <!-- الهيدر الرئيسي ووصف الموقع -->
+    <main class="max-w-6xl mx-auto px-6 py-12 text-center">
+        <div class="inline-block bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs px-3 py-1.5 rounded-full font-medium mb-4">
+            ⚡ سرعة عالية وحماية كاملة بدون ترافيك محدود
+        </div>
+        <h1 class="text-4xl md:text-5xl font-extrabold text-white tracking-tight mb-4">
+            متجر بروكسيات محلية بدون ترافيك
+        </h1>
+        <p class="text-slate-400 text-sm md:text-base max-w-xl mx-auto mb-12">
+            اختر الباقة المناسبة لك وسجل مباشرة بكل سهولة لاستخدام بروكسيات آمنة ونظيفة.
+        </p>
+
+        <!-- شبكة الباقات (مرتبة ومنظمة بشكل تصاعدي واحترافي) -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-right">
+            
+            <!-- باقة IP 50 -->
+            <div class="bg-slate-900/60 border border-slate-800 hover:border-emerald-500/50 rounded-2xl p-6 transition shadow-xl relative group">
+                <div class="text-slate-400 text-sm mb-1">الباقة الأساسية</div>
+                <div class="text-2xl font-bold text-white mb-3">IP 50</div>
+                <div class="text-emerald-400 text-xl font-extrabold mb-6">USDT 25</div>
+                <a href="register.html" class="block w-full text-center bg-slate-800 hover:bg-emerald-500 hover:text-slate-950 text-white font-medium py-2.5 rounded-xl transition">
+                    شراء الباقة
+                </a>
+            </div>
+
+            <!-- باقة IP 100 -->
+            <div class="bg-slate-900/60 border border-slate-800 hover:border-emerald-500/50 rounded-2xl p-6 transition shadow-xl relative group">
+                <div class="text-slate-400 text-sm mb-1">باقة متقدمة</div>
+                <div class="text-2xl font-bold text-white mb-3">IP 100</div>
+                <div class="text-emerald-400 text-xl font-extrabold mb-6">USDT 40</div>
+                <a href="register.html" class="block w-full text-center bg-slate-800 hover:bg-emerald-500 hover:text-slate-950 text-white font-medium py-2.5 rounded-xl transition">
+                    شراء الباقة
+                </a>
+            </div>
+
+            <!-- باقة IP 200 -->
+            <div class="bg-slate-900/60 border border-slate-800 hover:border-emerald-500/50 rounded-2xl p-6 transition shadow-xl relative group">
+                <div class="text-slate-400 text-sm mb-1">باقة احترافية</div>
+                <div class="text-2xl font-bold text-white mb-3">IP 200</div>
+                <div class="text-emerald-400 text-xl font-extrabold mb-6">USDT 70</div>
+                <a href="register.html" class="block w-full text-center bg-slate-800 hover:bg-emerald-500 hover:text-slate-950 text-white font-medium py-2.5 rounded-xl transition">
+                    شراء الباقة
+                </a>
+            </div>
+
+            <!-- باقة IP 300 -->
+            <div class="bg-slate-900/60 border border-slate-800 hover:border-emerald-500/50 rounded-2xl p-6 transition shadow-xl relative group">
+                <div class="text-slate-400 text-sm mb-1">باقة الأعمال</div>
+                <div class="text-2xl font-bold text-white mb-3">IP 300</div>
+                <div class="text-emerald-400 text-xl font-extrabold mb-6">USDT 100</div>
+                <a href="register.html" class="block w-full text-center bg-slate-800 hover:bg-emerald-500 hover:text-slate-950 text-white font-medium py-2.5 rounded-xl transition">
+                    شراء الباقة
+                </a>
+            </div>
+
+            <!-- باقة IP 400 -->
+            <div class="bg-slate-900/60 border border-slate-800 hover:border-emerald-500/50 rounded-2xl p-6 transition shadow-xl relative group">
+                <div class="text-slate-400 text-sm mb-1">باقة الشركات</div>
+                <div class="text-2xl font-bold text-white mb-3">IP 400</div>
+                <div class="text-emerald-400 text-xl font-extrabold mb-6">USDT 130</div>
+                <a href="register.html" class="block w-full text-center bg-slate-800 hover:bg-emerald-500 hover:text-slate-950 text-white font-medium py-2.5 rounded-xl transition">
+                    شراء الباقة
+                </a>
+            </div>
+
+            <!-- باقة IP 500 -->
+            <div class="bg-slate-900/60 border border-slate-800 hover:border-emerald-500/50 rounded-2xl p-6 transition shadow-xl relative group">
+                <div class="text-slate-400 text-sm mb-1">الباقة القصوى</div>
+                <div class="text-2xl font-bold text-white mb-3">IP 500</div>
+                <div class="text-emerald-400 text-xl font-extrabold mb-6">USDT 170</div>
+                <a href="register.html" class="block w-full text-center bg-slate-800 hover:bg-emerald-500 hover:text-slate-950 text-white font-medium py-2.5 rounded-xl transition">
+                    شراء الباقة
+                </a>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- سكربت زر التبديل بين الوضع المظلم والضياء -->
+    <script>
+        function toggleTheme() {
+            const body = document.getElementById('bodyTag');
+            const icon = document.getElementById('themeIcon');
+            
+            if (body.classList.contains('bg-slate-950')) {
+                // التحويل إلى الوضع الفاتح
+                body.classList.remove('bg-slate-950', 'text-slate-100');
+                body.classList.add('bg-slate-100', 'text-slate-900');
+                icon.classList.remove('fa-moon', 'text-amber-400');
+                icon.classList.add('fa-sun', 'text-orange-500');
             } else {
-                alert(data.message);
+                // العودة للوضع الداكن (Dark)
+                body.classList.remove('bg-slate-100', 'text-slate-900');
+                body.classList.add('bg-slate-950', 'text-slate-100');
+                icon.classList.remove('fa-sun', 'text-orange-500');
+                icon.classList.add('fa-moon', 'text-amber-400');
             }
         }
     </script>
