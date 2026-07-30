@@ -6,7 +6,7 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// ربط ملفات الواجهة الأمامية (Frontend) من مجلد public أو المجلد الحالي
+// ربط ملفات الواجهة الأمامية (Frontend) من المجلد الحالي
 app.use(express.static(__dirname));
 
 // الاتصال بقاعدة بيانات MongoDB
@@ -32,7 +32,7 @@ const Pool = mongoose.model('Pool', poolSchema);
 const userSchema = new mongoose.Schema({
     username: { type: String, required: true, unique: true },
     password: { type: String, required: true },
-    selectedPack: { type: Number, default: 0 }, // عدد الأيبيهات المختارة (مثلاً 400)
+    selectedPack: { type: Number, default: 0 }, // عدد الأيبيهات المختارة
     assignedPool: { type: Number, default: null }, // المكان الذي سُحبت منه الأيبيهات
     assignedIps: [String], // أرشيف الأيبيهات الخاصة بهذا المستخدم
     poolVersionWhenAssigned: { type: Number, default: 1 },
@@ -45,7 +45,7 @@ const User = mongoose.model('User', userSchema);
 
 // ==================== المسارات (API Routes) ====================
 
-// أ. مسار التسجيل (API & Form Compatible)
+// أ. مسار التسجيل عبر Fetch API
 app.post('/api/register', async (req, res) => {
     try {
         const { username, password, packSize } = req.body;
@@ -53,10 +53,10 @@ app.post('/api/register', async (req, res) => {
         // التحقق هل الاسم موجود مسبقاً
         const existingUser = await User.findOne({ username });
         if (existingUser) {
-            return res.status(400).json({ success: false, message: "اسم المستخدم مستخدم مسبقاً، اختر اسمآ آخر." });
+            return res.status(400).json({ success: false, message: "اسم المستخدم مستخدم مسبقاً، اختر اسماً آخر." });
         }
 
-        // إنشاء المستخدم الجديد
+        // إنشاء المستخدم الجديد وتخزينه في MongoDB
         const newUser = new User({
             username,
             password,
@@ -64,13 +64,13 @@ app.post('/api/register', async (req, res) => {
         });
         await newUser.save();
 
-        res.json({ success: true, message: "تم التسجيل بنجاح!", userId: newUser._id });
+        res.json({ success: true, message: "تم التسجيل بنجاح وتخزينه في القاعدة!", userId: newUser._id });
     } catch (error) {
         res.status(500).json({ success: false, error: error.message });
     }
 });
 
-// ب. مسار تسجيل الدخول (API)
+// ب. مسار تسجيل الدخول عبر Fetch API
 app.post('/api/login', async (req, res) => {
     try {
         const { username, password } = req.body;
@@ -86,7 +86,7 @@ app.post('/api/login', async (req, res) => {
     }
 });
 
-// ج. مسارات الدعم التقليدي للـ Forms (إذا تم إرسال الطلب مباشرة عبر المتصفح دون Fetch)
+// ج. مسارات الدعم للنماذج التقليدية (Forms)
 app.post('/register', async (req, res) => {
     try {
         const { username, password } = req.body;
@@ -96,7 +96,6 @@ app.post('/register', async (req, res) => {
         }
         const newUser = new User({ username, password });
         await newUser.save();
-        // التوجيه المباشر للوحة التحكم مع تمرير الـ ID
         res.redirect(`/dashboard.html?id=${newUser._id}`);
     } catch (err) {
         res.status(500).send("خطأ في التسجيل: " + err.message);
@@ -125,7 +124,6 @@ app.get('/api/user/:id', async (req, res) => {
         const user = await User.findById(req.params.id);
         if (!user) return res.status(404).json({ success: false, message: "المستخدم غير موجود" });
 
-        // التحقق مما إذا تم تحديث المكان الذي ينتمي إليه العضو (لتنبيهه)
         let needsUpdate = false;
         if (user.assignedPool) {
             const pool = await Pool.findOne({ poolNumber: user.assignedPool });
@@ -151,7 +149,6 @@ app.post('/api/buy/:id', async (req, res) => {
             return res.status(400).json({ success: false, message: "لم تقم بتحديد أي باقة للشراء." });
         }
 
-        // البحث في الأماكن بالترتيب من 1 إلى 8 عن مكان فيه أيبيهات كافية وغير مستخدمة
         let pools = await Pool.find().sort({ poolNumber: 1 });
         let targetPool = null;
         let availableIps = [];
@@ -166,16 +163,14 @@ app.post('/api/buy/:id', async (req, res) => {
         }
 
         if (!targetPool) {
-            return res.status(400).json({ success: false, message: "عذراً، جميع الأماكن فارغة أو لا توجد كمية كافية حالياً. يرجى الانتظار ريثما يتم شحن أيبيهات جديدة." });
+            return res.status(400).json({ success: false, message: "عذراً، جميع الأماكن فارغة أو لا توجد كمية كافية حالياً." });
         }
 
-        // تحديد الأيبيهات كمستخدمة في ذلك المكان
         for (let ipObj of availableIps) {
             ipObj.isUsed = true;
         }
         await targetPool.save();
 
-        // حفظ الأيبيهات في أرشيف العضو
         user.assignedIps = availableIps.map(i => i.ipAddress);
         user.assignedPool = targetPool.poolNumber;
         user.poolVersionWhenAssigned = targetPool.version;
@@ -220,7 +215,7 @@ app.get('/api/admin/data', async (req, res) => {
     }
 });
 
-// 2. التحكم في المستخدمين (توقيف، مسح، تغيير الباقة)
+// 2. التحكم في المستخدمين
 app.post('/api/admin/user-action', async (req, res) => {
     try {
         const { userId, action, newPack } = req.body;
@@ -250,7 +245,7 @@ app.post('/api/admin/user-action', async (req, res) => {
     }
 });
 
-// 3. إعادة تحميل/شحن الأيبيهات في مكان معين (Pool Restock) وتحديث النسخة
+// 3. شحن الأيبيهات في مكان معين
 app.post('/api/admin/restock-pool', async (req, res) => {
     try {
         const { poolNumber, ipsText } = req.body; 
