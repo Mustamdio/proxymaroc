@@ -82,9 +82,8 @@
             try {
                 const res = await fetch('/api/admin/data');
                 
-                // إذا لم يكن مصرحاً له، سيقوم السيرفر بإرجاع خطأ أو إعادة توجيه
                 if (!res.ok) {
-                    window.location.href = 'index.html';
+                    window.location.replace('/index.html');
                     return;
                 }
 
@@ -127,7 +126,7 @@
                         poolsGrid.innerHTML = `<div class="text-slate-500 text-sm">لا توجد أماكن معرفة حالياً.</div>`;
                     }
                 } else {
-                    window.location.href = 'index.html';
+                    window.location.replace('/index.html');
                 }
             } catch (err) {
                 console.error("خطأ في جلب بيانات الأدمن:", err);
@@ -164,7 +163,11 @@
 
         function logout() {
             localStorage.removeItem('proxyUserId');
-            window.location.href = '/logout';
+            sessionStorage.clear();
+            fetch('/logout', { method: 'GET', credentials: 'omit' })
+                .finally(() => {
+                    window.location.replace('/index.html');
+                });
         }
 
         // تشغيل الدالة عند تحميل الصفحة
