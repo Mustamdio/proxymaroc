@@ -62,6 +62,28 @@
             </div>
         </div>
 
+        <!-- قسم معلومات الدفع عبر USDT -->
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
+            <h2 class="text-xl font-bold text-white mb-2 flex items-center gap-2">
+                <i class="fa-solid fa-wallet text-emerald-400"></i> تفاصيل الدفع عبر USDT (TRC20)
+            </h2>
+            <p class="text-slate-400 text-sm">
+                يرجى إرسال قيمة الباقة المحددة إلى عنوان المحفظة أدناه، وسيتم تفعيل حسابك مباشرة بمجرد التأكيد:
+            </p>
+            <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-2">
+                <span class="text-slate-400 text-xs block">عنوان المحفظة (USDT - TRC20):</span>
+                <div class="flex items-center justify-between gap-2 bg-slate-900 p-3 rounded-lg border border-slate-800">
+                    <span id="usdtWalletAddress" class="font-mono text-emerald-400 text-xs md:text-sm select-all">TXTheWalletAddressExampleHere123456789</span>
+                    <button onclick="copyWallet()" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-bold px-3 py-2 rounded-lg transition">
+                        <i class="fa-regular fa-copy"></i> نسخ
+                    </button>
+                </div>
+            </div>
+            <div class="text-xs text-amber-400">
+                ⚠️ تأكد من إرسال المبلغ عبر شبكة TRC20 حصراً لتفادي ضياع الأموال.
+            </div>
+        </div>
+
         <!-- قسم عرض الأيبيهات المسحوبة -->
         <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl">
             <h2 class="text-xl font-bold text-white mb-4">الأيبيهات الخاصة بك</h2>
@@ -73,7 +95,6 @@
     </main>
 
     <script>
-        // استخراج الـ ID من الرابط أو التخزين المحلي
         const urlParams = new URLSearchParams(window.location.search);
         let userId = urlParams.get('id');
 
@@ -89,7 +110,6 @@
             loadUserData();
         }
 
-        // جلب بيانات المستخدم من السيرفر
         async function loadUserData() {
             try {
                 const res = await fetch(`/api/user/${userId}`);
@@ -112,12 +132,10 @@
                         document.getElementById('updateAlert').classList.remove('hidden');
                     }
 
-                    // عرض الأيبيهات إن وجدت
                     const ipsContainer = document.getElementById('ipsContainer');
                     if (user.assignedIps && user.assignedIps.length > 0) {
                         ipsContainer.innerHTML = user.assignedIps.map(ip => `<div>${ip}</div>`).join('');
                         
-                        // إظهار زر التحميل
                         const downloadBtn = document.getElementById('downloadBtn');
                         downloadBtn.href = `/api/download-ips/${userId}`;
                         downloadBtn.classList.remove('hidden');
@@ -134,7 +152,6 @@
             }
         }
 
-        // تنفيذ عملية الشراء
         async function buyProxies() {
             try {
                 const res = await fetch(`/api/buy/${userId}`, {
@@ -145,7 +162,7 @@
 
                 if (data.success) {
                     alert(data.message);
-                    loadUserData(); // إعادة تحديث البيانات في الصفحة
+                    loadUserData();
                 } else {
                     alert(data.message || "حدث خطأ أثناء عملية الشراء");
                 }
@@ -154,7 +171,13 @@
             }
         }
 
-        // تسجيل الخروج
+        function copyWallet() {
+            const address = document.getElementById('usdtWalletAddress').innerText;
+            navigator.clipboard.writeText(address).then(() => {
+                alert('تم نسخ عنوان المحفظة بنجاح!');
+            });
+        }
+
         function logout() {
             localStorage.removeItem('proxyUserId');
             window.location.href = 'index.html';
