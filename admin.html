@@ -3,175 +3,289 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لوحة تحكم الأدمن - ProxyMaroc</title>
+    <title>ProxyMaroc - متجر بروكسيات محلية بدون ترافيك</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        darkBg: '#0f172a',
+                        cardBg: '#1e293b',
+                        accentGreen: '#10b981'
+                    }
+                }
+            }
+        }
+    </script>
 </head>
-<body class="bg-slate-950 text-slate-100 font-sans min-h-screen">
+<body class="bg-slate-950 text-slate-100 font-sans min-h-screen transition-colors duration-300" id="bodyTag">
 
-    <!-- Header -->
-    <header class="w-full border-b border-slate-800 bg-slate-900/50 px-6 py-4 flex items-center justify-between">
-        <div class="flex items-center space-x-reverse space-x-3">
-            <div class="bg-emerald-500 text-slate-950 p-2 rounded-xl font-bold">
-                <i class="fa-solid fa-shield-halved"></i>
+    <!-- Navbar الاحترافي -->
+    <header class="w-full border-b border-slate-800/60 bg-slate-900/50 backdrop-blur-md sticky top-0 z-50 px-6 py-3 flex items-center justify-between">
+        
+        <!-- الشعار ورابط تليجرام -->
+        <div class="flex items-center space-x-reverse space-x-8">
+            <div class="flex items-center space-x-reverse space-x-3 cursor-pointer">
+                <div class="bg-emerald-500 text-slate-950 p-2 rounded-xl flex items-center justify-center font-bold shadow-lg shadow-emerald-500/20">
+                    <i class="fa-solid fa-shield-halved text-lg"></i>
+                </div>
+                <span class="font-bold text-lg tracking-wide text-white">ProxyMaroc</span>
             </div>
-            <span class="font-bold text-lg text-white">لوحة تحكم المشرف (Admin Panel)</span>
+
+            <nav class="hidden md:flex items-center space-x-reverse space-x-6 text-sm text-slate-400">
+                <a href="https://t.me/YOUR_TELEGRAM" target="_blank" class="flex items-center space-x-reverse space-x-2 hover:text-emerald-400 transition">
+                    <i class="fa-brands fa-telegram text-emerald-400"></i>
+                    <span>تليجرام</span>
+                </a>
+            </nav>
         </div>
-        <button onclick="logout()" class="bg-red-500/10 text-red-400 text-xs px-3 py-2 rounded-xl border border-red-500/20 hover:bg-red-500/20 transition">
-            <i class="fa-solid fa-right-from-bracket ml-1"></i> خروج
-        </button>
-    </header>
 
-    <main class="max-w-7xl mx-auto px-6 py-10 space-y-10">
+        <!-- الأزرار العلوية -->
+        <div class="flex items-center space-x-reverse space-x-4">
+            <!-- زر الثيم -->
+            <button onclick="toggleTheme()" class="bg-slate-800/80 hover:bg-slate-700 text-amber-400 p-2.5 rounded-xl border border-slate-700 transition" title="تغيير المظهر">
+                <i id="themeIcon" class="fa-solid fa-moon text-sm"></i>
+            </button>
 
-        <!-- قسم شحن الأماكن (Pools Restock) -->
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-6">
-            <h2 class="text-xl font-bold text-white flex items-center gap-2">
-                <i class="fa-solid fa-server text-emerald-400"></i> إدارة وشحن الأماكن (Pools 1 to 8)
-            </h2>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div>
-                    <label class="block text-sm text-slate-400 mb-2">رقم المكان (من 1 إلى 8):</label>
-                    <input type="number" id="poolNumberInput" min="1" max="8" value="1" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500">
-                </div>
-                <div class="md:col-span-2">
-                    <label class="block text-sm text-slate-400 mb-2">قائمة الأيبيهات (كل إيبي في سطر):</label>
-                    <textarea id="ipsTextInput" rows="4" placeholder="192.168.1.1&#10;192.168.1.2" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white font-mono text-xs focus:outline-none focus:border-emerald-500"></textarea>
-                </div>
-            </div>
-            <button onclick="restockPool()" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold px-6 py-3 rounded-xl transition shadow-lg shadow-emerald-500/20">
-                <i class="fa-solid fa-upload ml-1"></i> شحن المكان وتحديث النسخة (Restock)
+            <!-- زر تسجيل الدخول -->
+            <button onclick="openModal('loginModal')" class="text-sm font-medium text-slate-300 hover:text-white px-3 py-2 transition">
+                تسجيل الدخول
+            </button>
+
+            <!-- زر إنشاء حساب -->
+            <button onclick="openModal('registerModal')" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-sm font-bold px-4 py-2 rounded-xl transition shadow-lg shadow-emerald-500/20">
+                إنشاء حساب
             </button>
         </div>
+    </header>
 
-        <!-- قسم حالة الأماكن الحالية -->
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
-            <h2 class="text-xl font-bold text-white">حالة الأماكن الحالية في النظام</h2>
-            <div id="poolsGrid" class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div class="text-slate-500 text-sm">جاري تحميل الأماكن...</div>
-            </div>
+    <!-- المحتوى الرئيسي (الباقات) -->
+    <main class="max-w-6xl mx-auto px-6 py-12 text-center">
+        <div class="inline-block bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs px-3 py-1.5 rounded-full font-medium mb-4">
+            ⚡ سرعة عالية وحماية كاملة بدون ترافيك محدود
         </div>
+        <h1 class="text-4xl md:text-5xl font-extrabold text-white tracking-tight mb-4">
+            متجر بروكسيات محلية بدون ترافيك
+        </h1>
+        <p class="text-slate-400 text-sm md:text-base max-w-xl mx-auto mb-12">
+            اختر الباقة المناسبة لك وسجل مباشرة بكل سهولة لاستخدام بروكسيات آمنة ونظيفة.
+        </p>
 
-        <!-- جدول الأعضاء المسجلين -->
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
-            <h2 class="text-xl font-bold text-white">إدارة الأعضاء والاشتراكات</h2>
-            <div class="overflow-x-auto">
-                <table class="w-full text-right text-sm">
-                    <thead class="bg-slate-950 text-slate-400 border-b border-slate-800">
-                        <tr>
-                            <th class="p-3">اسم المستخدم</th>
-                            <th class="p-3">الباقة</th>
-                            <th class="p-3">المكان المرتبط</th>
-                            <th class="p-3">حالة الدفع</th>
-                            <th class="p-3">الحالة</th>
-                            <th class="p-3">الإجراءات</th>
-                        </tr>
-                    </thead>
-                    <tbody id="usersTableBody" class="divide-y divide-slate-800/50">
-                        <tr><td colspan="6" class="p-4 text-center text-slate-500">جاري تحميل الأعضاء...</td></tr>
-                    </tbody>
-                </table>
+        <!-- شبكة الباقات -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-right">
+            
+            <div class="bg-slate-900/60 border border-slate-800 hover:border-emerald-500/50 rounded-2xl p-6 transition shadow-xl">
+                <div class="text-slate-400 text-sm mb-1">الباقة الأساسية</div>
+                <div class="text-2xl font-bold text-white mb-3">IP 50</div>
+                <div class="text-emerald-400 text-xl font-extrabold mb-6">USDT 25</div>
+                <button onclick="openModal('registerModal', 50)" class="w-full text-center bg-slate-800 hover:bg-emerald-500 hover:text-slate-950 text-white font-medium py-2.5 rounded-xl transition">
+                    شراء الباقة
+                </button>
             </div>
-        </div>
 
+            <div class="bg-slate-900/60 border border-slate-800 hover:border-emerald-500/50 rounded-2xl p-6 transition shadow-xl">
+                <div class="text-slate-400 text-sm mb-1">باقة متقدمة</div>
+                <div class="text-2xl font-bold text-white mb-3">IP 100</div>
+                <div class="text-emerald-400 text-xl font-extrabold mb-6">USDT 40</div>
+                <button onclick="openModal('registerModal', 100)" class="w-full text-center bg-slate-800 hover:bg-emerald-500 hover:text-slate-950 text-white font-medium py-2.5 rounded-xl transition">
+                    شراء الباقة
+                </button>
+            </div>
+
+            <div class="bg-slate-900/60 border border-slate-800 hover:border-emerald-500/50 rounded-2xl p-6 transition shadow-xl">
+                <div class="text-slate-400 text-sm mb-1">باقة احترافية</div>
+                <div class="text-2xl font-bold text-white mb-3">IP 200</div>
+                <div class="text-emerald-400 text-xl font-extrabold mb-6">USDT 70</div>
+                <button onclick="openModal('registerModal', 200)" class="w-full text-center bg-slate-800 hover:bg-emerald-500 hover:text-slate-950 text-white font-medium py-2.5 rounded-xl transition">
+                    شراء الباقة
+                </button>
+            </div>
+
+            <div class="bg-slate-900/60 border border-slate-800 hover:border-emerald-500/50 rounded-2xl p-6 transition shadow-xl">
+                <div class="text-slate-400 text-sm mb-1">باقة الأعمال</div>
+                <div class="text-2xl font-bold text-white mb-3">IP 300</div>
+                <div class="text-emerald-400 text-xl font-extrabold mb-6">USDT 100</div>
+                <button onclick="openModal('registerModal', 300)" class="w-full text-center bg-slate-800 hover:bg-emerald-500 hover:text-slate-950 text-white font-medium py-2.5 rounded-xl transition">
+                    شراء الباقة
+                </button>
+            </div>
+
+            <div class="bg-slate-900/60 border border-slate-800 hover:border-emerald-500/50 rounded-2xl p-6 transition shadow-xl">
+                <div class="text-slate-400 text-sm mb-1">باقة الشركات</div>
+                <div class="text-2xl font-bold text-white mb-3">IP 400</div>
+                <div class="text-emerald-400 text-xl font-extrabold mb-6">USDT 130</div>
+                <button onclick="openModal('registerModal', 400)" class="w-full text-center bg-slate-800 hover:bg-emerald-500 hover:text-slate-950 text-white font-medium py-2.5 rounded-xl transition">
+                    شراء الباقة
+                </button>
+            </div>
+
+            <div class="bg-slate-900/60 border border-slate-800 hover:border-emerald-500/50 rounded-2xl p-6 transition shadow-xl">
+                <div class="text-slate-400 text-sm mb-1">الباقة القصوى</div>
+                <div class="text-2xl font-bold text-white mb-3">IP 500</div>
+                <div class="text-emerald-400 text-xl font-extrabold mb-6">USDT 170</div>
+                <button onclick="openModal('registerModal', 500)" class="w-full text-center bg-slate-800 hover:bg-emerald-500 hover:text-slate-950 text-white font-medium py-2.5 rounded-xl transition">
+                    شراء الباقة
+                </button>
+            </div>
+
+        </div>
     </main>
 
+    <!-- نافذة تسجيل الدخول المنبثقة (Modal) -->
+    <div id="loginModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 w-full max-w-md relative text-right shadow-2xl">
+            <button onclick="closeModal('loginModal')" class="absolute top-4 left-4 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            <h2 class="text-2xl font-bold text-white mb-6">تسجيل الدخول</h2>
+            <form id="loginForm" onsubmit="handleLogin(event)" class="space-y-4">
+                <div>
+                    <label class="block text-sm text-slate-400 mb-1">اسم المستخدم</label>
+                    <input type="text" id="loginUsername" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-emerald-500">
+                </div>
+                <div>
+                    <label class="block text-sm text-slate-400 mb-1">كلمة المرور</label>
+                    <input type="password" id="loginPassword" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-emerald-500">
+                </div>
+                <button type="submit" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold py-3 rounded-xl transition shadow-lg shadow-emerald-500/20">دخول</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- نافذة إنشاء حساب المنبثقة (Modal) مع زر النسخ والتنبيه -->
+    <div id="registerModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 w-full max-w-md relative text-right shadow-2xl">
+            <button onclick="closeModal('registerModal')" class="absolute top-4 left-4 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            <h2 class="text-2xl font-bold text-white mb-6">إنشاء حساب جديد</h2>
+            
+            <!-- نموذج التسجيل -->
+            <form id="registerForm" onsubmit="handleRegister(event)" class="space-y-4">
+                <div>
+                    <label class="block text-sm text-slate-400 mb-1">اسم المستخدم</label>
+                    <input type="text" id="regUsername" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-emerald-500">
+                </div>
+                <div>
+                    <label class="block text-sm text-slate-400 mb-1">كلمة المرور</label>
+                    <input type="password" id="regPassword" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-emerald-500">
+                </div>
+                <button type="submit" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold py-3 rounded-xl transition shadow-lg shadow-emerald-500/20">تسجيل</button>
+            </form>
+
+            <!-- قسم إظهار معلومات الحساب وزر النسخ بعد التسجيل -->
+            <div id="successBox" class="hidden mt-4 p-4 bg-slate-950 border border-emerald-500/30 rounded-xl text-center space-y-3">
+                <div class="text-emerald-400 font-bold text-sm">تم إنشاء الحساب بنجاح وتخزينه في القاعدة!</div>
+                <div class="text-xs text-slate-300 bg-slate-900 p-2 rounded border border-slate-800 select-all" id="credentialsText"></div>
+                <div class="flex items-center justify-between gap-2">
+                    <button type="button" onclick="copyCredentials()" class="flex-1 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold py-2 px-3 rounded-lg text-sm transition flex items-center justify-center gap-2">
+                        <i class="fa-regular fa-copy"></i> نسخ المعلومات
+                    </button>
+                </div>
+                <p class="text-xs text-amber-400 font-medium">⚠️ احتفظ بمعلوماتك في مكان آمن!</p>
+                <button type="button" id="goToDashBtn" class="w-full mt-2 bg-slate-800 hover:bg-slate-700 text-white font-bold py-2 rounded-lg text-sm transition">الانتقال إلى لوحة التحكم</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- سكربت التحكم والتواصل مع السيرفر -->
     <script>
-        // التحقق من صلاحيات المشرف وجلب البيانات
-        async function loadAdminData() {
-            try {
-                const res = await fetch('/api/admin/data');
-                
-                if (!res.ok) {
-                    window.location.replace('/index.html');
-                    return;
-                }
+        let selectedPackSize = 0;
 
-                const data = await res.json();
-
-                if (data.success) {
-                    // تعبئة جدول الأعضاء
-                    const tbody = document.getElementById('usersTableBody');
-                    if (data.users && data.users.length > 0) {
-                        tbody.innerHTML = data.users.map(user => `
-                            <tr class="hover:bg-slate-950/50">
-                                <td class="p-3 font-bold text-white">${user.username}</td>
-                                <td class="p-3">${user.selectedPack} IP</td>
-                                <td class="p-3">${user.assignedPool ? 'المكان ' + user.assignedPool : 'غير مرتبطة'}</td>
-                                <td class="p-3"><span class="${user.paymentStatus === 'paid' ? 'text-emerald-400' : 'text-amber-400'}">${user.paymentStatus}</span></td>
-                                <td class="p-3"><span class="${user.status === 'active' ? 'text-emerald-400' : 'text-red-400'}">${user.status}</span></td>
-                                <td class="p-3 space-x-reverse space-x-2">
-                                    <span class="text-slate-500 text-xs">قريباً التحكم الكامل</span>
-                                </td>
-                            </tr>
-                        `).join('');
-                    } else {
-                        tbody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-slate-500">لا يوجد أعضاء مسجلين حالياً.</td></tr>`;
-                    }
-
-                    // عرض حالة الأماكن
-                    const poolsGrid = document.getElementById('poolsGrid');
-                    if (data.pools && data.pools.length > 0) {
-                        poolsGrid.innerHTML = data.pools.map(pool => {
-                            const unusedCount = pool.ips ? pool.ips.filter(i => !i.isUsed).length : 0;
-                            return `
-                                <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-1">
-                                    <div class="text-white font-bold">المكان رقم ${pool.poolNumber}</div>
-                                    <div class="text-xs text-slate-400">المتاح: <span class="text-emerald-400 font-bold">${unusedCount}</span> IP</div>
-                                    <div class="text-xs text-slate-500">النسخة: v${pool.version}</div>
-                                </div>
-                            `;
-                        }).join('');
-                    } else {
-                        poolsGrid.innerHTML = `<div class="text-slate-500 text-sm">لا توجد أماكن معرفة حالياً.</div>`;
-                    }
-                } else {
-                    window.location.replace('/index.html');
-                }
-            } catch (err) {
-                console.error("خطأ في جلب بيانات الأدمن:", err);
+        function toggleTheme() {
+            const body = document.getElementById('bodyTag');
+            const icon = document.getElementById('themeIcon');
+            if (body.classList.contains('bg-slate-950')) {
+                body.classList.remove('bg-slate-950', 'text-slate-100');
+                body.classList.add('bg-slate-100', 'text-slate-900');
+                icon.classList.remove('fa-moon', 'text-amber-400');
+                icon.classList.add('fa-sun', 'text-orange-500');
+            } else {
+                body.classList.remove('bg-slate-100', 'text-slate-900');
+                body.classList.add('bg-slate-950', 'text-slate-100');
+                icon.classList.remove('fa-sun', 'text-orange-500');
+                icon.classList.add('fa-moon', 'text-amber-400');
             }
         }
 
-        async function restockPool() {
-            const poolNumber = document.getElementById('poolNumberInput').value;
-            const ipsText = document.getElementById('ipsTextInput').value;
-
-            if (!ipsText.trim()) {
-                alert("يرجى إدخال الأيبيهات أولاً.");
-                return;
+        function openModal(modalId, packSize = 0) {
+            if (packSize > 0) {
+                selectedPackSize = packSize;
             }
+            document.getElementById(modalId).classList.remove('hidden');
+            document.getElementById(modalId).classList.add('flex');
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('flex');
+            document.getElementById(modalId).classList.add('hidden');
+            document.getElementById('registerForm').classList.remove('hidden');
+            document.getElementById('successBox').classList.add('hidden');
+        }
+
+        async function handleRegister(event) {
+            event.preventDefault();
+            const username = document.getElementById('regUsername').value;
+            const password = document.getElementById('regPassword').value;
 
             try {
-                const res = await fetch('/api/admin/restock-pool', {
+                const res = await fetch('/api/register', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ poolNumber: parseInt(poolNumber), ipsText })
+                    body: JSON.stringify({ username, password, packSize: selectedPackSize })
                 });
                 const data = await res.json();
+
                 if (data.success) {
-                    alert(data.message);
-                    document.getElementById('ipsTextInput').value = '';
-                    loadAdminData();
+                    document.getElementById('registerForm').classList.add('hidden');
+                    document.getElementById('credentialsText').innerText = `اسم المستخدم: ${username} | كلمة المرور: ${password} | الباقة: ${selectedPackSize} IP`;
+                    document.getElementById('successBox').classList.remove('hidden');
+                    
+                    document.getElementById('goToDashBtn').onclick = () => {
+                        window.location.href = `dashboard.html?id=${data.userId}`;
+                    };
                 } else {
-                    alert(data.message);
+                    alert(data.message || "حدث خطأ أثناء التسجيل");
                 }
             } catch (err) {
                 alert("خطأ في الاتصال بالخادم");
             }
         }
 
-        function logout() {
-            localStorage.removeItem('proxyUserId');
-            sessionStorage.clear();
-            fetch('/logout', { method: 'GET', credentials: 'omit' })
-                .finally(() => {
-                    window.location.replace('/index.html');
+        async function handleLogin(event) {
+            event.preventDefault();
+            const username = document.getElementById('loginUsername').value;
+            const password = document.getElementById('loginPassword').value;
+
+            try {
+                const res = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
                 });
+                const data = await res.json();
+
+                if (data.success) {
+                    if (data.isAdmin) {
+                        window.location.href = 'admin.html';
+                    } else {
+                        window.location.href = `dashboard.html?id=${data.userId}`;
+                    }
+                } else {
+                    alert(data.message || "بيانات الدخول غير صحيحة");
+                }
+            } catch (err) {
+                alert("خطأ في الاتصال بالخادم");
+            }
         }
 
-        // تشغيل الدالة عند تحميل الصفحة
-        loadAdminData();
+        function copyCredentials() {
+            const text = document.getElementById('credentialsText').innerText;
+            navigator.clipboard.writeText(text).then(() => {
+                alert('تم نسخ المعلومات بنجاح!');
+            }).catch(err => {
+                console.error('Failed to copy text: ', err);
+            });
+        }
     </script>
 </body>
 </html>
