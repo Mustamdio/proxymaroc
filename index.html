@@ -1,297 +1,54 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ProxyMaroc - متجر بروكسيات محلية بدون ترافيك</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        darkBg: '#0f172a',
-                        cardBg: '#1e293b',
-                        accentGreen: '#10b981'
-                    }
-                }
-            }
-        }
-    </script>
-</head>
-<body class="bg-slate-950 text-slate-100 font-sans min-h-screen transition-colors duration-300" id="bodyTag">
+<!-- استبدل أزرار الباقات في index.html بهذا الشكل لتمرير حجم الباقة -->
+<div class="bg-slate-900/60 border border-slate-800 hover:border-emerald-500/50 rounded-2xl p-6 transition shadow-xl">
+    <div class="text-slate-400 text-sm mb-1">الباقة الأساسية</div>
+    <div class="text-2xl font-bold text-white mb-3">IP 50</div>
+    <div class="text-emerald-400 text-xl font-extrabold mb-6">USDT 25</div>
+    <button onclick="openModal('registerModal', 50)" class="w-full text-center bg-slate-800 hover:bg-emerald-500 hover:text-slate-950 text-white font-medium py-2.5 rounded-xl transition">
+        شراء الباقة
+    </button>
+</div>
 
-    <!-- Navbar الاحترافي -->
-    <header class="w-full border-b border-slate-800/60 bg-slate-900/50 backdrop-blur-md sticky top-0 z-50 px-6 py-3 flex items-center justify-between">
-        
-        <!-- الشعار ورابط تليجرام -->
-        <div class="flex items-center space-x-reverse space-x-8">
-            <div class="flex items-center space-x-reverse space-x-3 cursor-pointer">
-                <div class="bg-emerald-500 text-slate-950 p-2 rounded-xl flex items-center justify-center font-bold shadow-lg shadow-emerald-500/20">
-                    <i class="fa-solid fa-shield-halved text-lg"></i>
-                </div>
-                <span class="font-bold text-lg tracking-wide text-white">ProxyMaroc</span>
-            </div>
+<div class="bg-slate-900/60 border border-slate-800 hover:border-emerald-500/50 rounded-2xl p-6 transition shadow-xl">
+    <div class="text-slate-400 text-sm mb-1">باقة متقدمة</div>
+    <div class="text-2xl font-bold text-white mb-3">IP 100</div>
+    <div class="text-emerald-400 text-xl font-extrabold mb-6">USDT 40</div>
+    <button onclick="openModal('registerModal', 100)" class="w-full text-center bg-slate-800 hover:bg-emerald-500 hover:text-slate-950 text-white font-medium py-2.5 rounded-xl transition">
+        شراء الباقة
+    </button>
+</div>
 
-            <nav class="hidden md:flex items-center space-x-reverse space-x-6 text-sm text-slate-400">
-                <a href="https://t.me/YOUR_TELEGRAM" target="_blank" class="flex items-center space-x-reverse space-x-2 hover:text-emerald-400 transition">
-                    <i class="fa-brands fa-telegram text-emerald-400"></i>
-                    <span>تليجرام</span>
-                </a>
-            </nav>
-        </div>
+<div class="bg-slate-900/60 border border-slate-800 hover:border-emerald-500/50 rounded-2xl p-6 transition shadow-xl">
+    <div class="text-slate-400 text-sm mb-1">باقة احترافية</div>
+    <div class="text-2xl font-bold text-white mb-3">IP 200</div>
+    <div class="text-emerald-400 text-xl font-extrabold mb-6">USDT 70</div>
+    <button onclick="openModal('registerModal', 200)" class="w-full text-center bg-slate-800 hover:bg-emerald-500 hover:text-slate-950 text-white font-medium py-2.5 rounded-xl transition">
+        شراء الباقة
+    </button>
+</div>
 
-        <!-- الأزرار العلوية -->
-        <div class="flex items-center space-x-reverse space-x-4">
-            <!-- زر الثيم -->
-            <button onclick="toggleTheme()" class="bg-slate-800/80 hover:bg-slate-700 text-amber-400 p-2.5 rounded-xl border border-slate-700 transition" title="تغيير المظهر">
-                <i id="themeIcon" class="fa-solid fa-moon text-sm"></i>
-            </button>
+<div class="bg-slate-900/60 border border-slate-800 hover:border-emerald-500/50 rounded-2xl p-6 transition shadow-xl">
+    <div class="text-slate-400 text-sm mb-1">باقة الأعمال</div>
+    <div class="text-2xl font-bold text-white mb-3">IP 300</div>
+    <div class="text-emerald-400 text-xl font-extrabold mb-6">USDT 100</div>
+    <button onclick="openModal('registerModal', 300)" class="w-full text-center bg-slate-800 hover:bg-emerald-500 hover:text-slate-950 text-white font-medium py-2.5 rounded-xl transition">
+        شراء الباقة
+    </button>
+</div>
 
-            <!-- زر تسجيل الدخول -->
-            <button onclick="openModal('loginModal')" class="text-sm font-medium text-slate-300 hover:text-white px-3 py-2 transition">
-                تسجيل الدخول
-            </button>
+<div class="bg-slate-900/60 border border-slate-800 hover:border-emerald-500/50 rounded-2xl p-6 transition shadow-xl">
+    <div class="text-slate-400 text-sm mb-1">باقة الشركات</div>
+    <div class="text-2xl font-bold text-white mb-3">IP 400</div>
+    <div class="text-emerald-400 text-xl font-extrabold mb-6">USDT 130</div>
+    <button onclick="openModal('registerModal', 400)" class="w-full text-center bg-slate-800 hover:bg-emerald-500 hover:text-slate-950 text-white font-medium py-2.5 rounded-xl transition">
+        شراء الباقة
+    </button>
+</div>
 
-            <!-- زر إنشاء حساب -->
-            <button onclick="openModal('registerModal')" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-sm font-bold px-4 py-2 rounded-xl transition shadow-lg shadow-emerald-500/20">
-                إنشاء حساب
-            </button>
-        </div>
-    </header>
-
-    <!-- المحتوى الرئيسي (الباقات) -->
-    <main class="max-w-6xl mx-auto px-6 py-12 text-center">
-        <div class="inline-block bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs px-3 py-1.5 rounded-full font-medium mb-4">
-            ⚡ سرعة عالية وحماية كاملة بدون ترافيك محدود
-        </div>
-        <h1 class="text-4xl md:text-5xl font-extrabold text-white tracking-tight mb-4">
-            متجر بروكسيات محلية بدون ترافيك
-        </h1>
-        <p class="text-slate-400 text-sm md:text-base max-w-xl mx-auto mb-12">
-            اختر الباقة المناسبة لك وسجل مباشرة بكل سهولة لاستخدام بروكسيات آمنة ونظيفة.
-        </p>
-
-        <!-- شبكة الباقات -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-right">
-            
-            <div class="bg-slate-900/60 border border-slate-800 hover:border-emerald-500/50 rounded-2xl p-6 transition shadow-xl">
-                <div class="text-slate-400 text-sm mb-1">الباقة الأساسية</div>
-                <div class="text-2xl font-bold text-white mb-3">IP 50</div>
-                <div class="text-emerald-400 text-xl font-extrabold mb-6">USDT 25</div>
-                <button onclick="openModal('registerModal')" class="w-full text-center bg-slate-800 hover:bg-emerald-500 hover:text-slate-950 text-white font-medium py-2.5 rounded-xl transition">
-                    شراء الباقة
-                </button>
-            </div>
-
-            <div class="bg-slate-900/60 border border-slate-800 hover:border-emerald-500/50 rounded-2xl p-6 transition shadow-xl">
-                <div class="text-slate-400 text-sm mb-1">باقة متقدمة</div>
-                <div class="text-2xl font-bold text-white mb-3">IP 100</div>
-                <div class="text-emerald-400 text-xl font-extrabold mb-6">USDT 40</div>
-                <button onclick="openModal('registerModal')" class="w-full text-center bg-slate-800 hover:bg-emerald-500 hover:text-slate-950 text-white font-medium py-2.5 rounded-xl transition">
-                    شراء الباقة
-                </button>
-            </div>
-
-            <div class="bg-slate-900/60 border border-slate-800 hover:border-emerald-500/50 rounded-2xl p-6 transition shadow-xl">
-                <div class="text-slate-400 text-sm mb-1">باقة احترافية</div>
-                <div class="text-2xl font-bold text-white mb-3">IP 200</div>
-                <div class="text-emerald-400 text-xl font-extrabold mb-6">USDT 70</div>
-                <button onclick="openModal('registerModal')" class="w-full text-center bg-slate-800 hover:bg-emerald-500 hover:text-slate-950 text-white font-medium py-2.5 rounded-xl transition">
-                    شراء الباقة
-                </button>
-            </div>
-
-            <div class="bg-slate-900/60 border border-slate-800 hover:border-emerald-500/50 rounded-2xl p-6 transition shadow-xl">
-                <div class="text-slate-400 text-sm mb-1">باقة الأعمال</div>
-                <div class="text-2xl font-bold text-white mb-3">IP 300</div>
-                <div class="text-emerald-400 text-xl font-extrabold mb-6">USDT 100</div>
-                <button onclick="openModal('registerModal')" class="w-full text-center bg-slate-800 hover:bg-emerald-500 hover:text-slate-950 text-white font-medium py-2.5 rounded-xl transition">
-                    شراء الباقة
-                </button>
-            </div>
-
-            <div class="bg-slate-900/60 border border-slate-800 hover:border-emerald-500/50 rounded-2xl p-6 transition shadow-xl">
-                <div class="text-slate-400 text-sm mb-1">باقة الشركات</div>
-                <div class="text-2xl font-bold text-white mb-3">IP 400</div>
-                <div class="text-emerald-400 text-xl font-extrabold mb-6">USDT 130</div>
-                <button onclick="openModal('registerModal')" class="w-full text-center bg-slate-800 hover:bg-emerald-500 hover:text-slate-950 text-white font-medium py-2.5 rounded-xl transition">
-                    شراء الباقة
-                </button>
-            </div>
-
-            <div class="bg-slate-900/60 border border-slate-800 hover:border-emerald-500/50 rounded-2xl p-6 transition shadow-xl">
-                <div class="text-slate-400 text-sm mb-1">الباقة القصوى</div>
-                <div class="text-2xl font-bold text-white mb-3">IP 500</div>
-                <div class="text-emerald-400 text-xl font-extrabold mb-6">USDT 170</div>
-                <button onclick="openModal('registerModal')" class="w-full text-center bg-slate-800 hover:bg-emerald-500 hover:text-slate-950 text-white font-medium py-2.5 rounded-xl transition">
-                    شراء الباقة
-                </button>
-            </div>
-
-        </div>
-    </main>
-
-    <!-- نافذة تسجيل الدخول المنبثقة (Modal) -->
-    <div id="loginModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 w-full max-w-md relative text-right shadow-2xl">
-            <button onclick="closeModal('loginModal')" class="absolute top-4 left-4 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
-            <h2 class="text-2xl font-bold text-white mb-6">تسجيل الدخول</h2>
-            <form id="loginForm" onsubmit="handleLogin(event)" class="space-y-4">
-                <div>
-                    <label class="block text-sm text-slate-400 mb-1">اسم المستخدم</label>
-                    <input type="text" id="loginUsername" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-emerald-500">
-                </div>
-                <div>
-                    <label class="block text-sm text-slate-400 mb-1">كلمة المرور</label>
-                    <input type="password" id="loginPassword" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-emerald-500">
-                </div>
-                <button type="submit" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold py-3 rounded-xl transition shadow-lg shadow-emerald-500/20">دخول</button>
-            </form>
-        </div>
-    </div>
-
-    <!-- نافذة إنشاء حساب المنبثقة (Modal) مع زر النسخ والتنبيه -->
-    <div id="registerModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 w-full max-w-md relative text-right shadow-2xl">
-            <button onclick="closeModal('registerModal')" class="absolute top-4 left-4 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
-            <h2 class="text-2xl font-bold text-white mb-6">إنشاء حساب جديد</h2>
-            
-            <!-- نموذج التسجيل -->
-            <form id="registerForm" onsubmit="handleRegister(event)" class="space-y-4">
-                <div>
-                    <label class="block text-sm text-slate-400 mb-1">اسم المستخدم</label>
-                    <input type="text" id="regUsername" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-emerald-500">
-                </div>
-                <div>
-                    <label class="block text-sm text-slate-400 mb-1">كلمة المرور</label>
-                    <input type="password" id="regPassword" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-emerald-500">
-                </div>
-                <button type="submit" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold py-3 rounded-xl transition shadow-lg shadow-emerald-500/20">تسجيل</button>
-            </form>
-
-            <!-- قسم إظهار معلومات الحساب وزر النسخ بعد التسجيل -->
-            <div id="successBox" class="hidden mt-4 p-4 bg-slate-950 border border-emerald-500/30 rounded-xl text-center space-y-3">
-                <div class="text-emerald-400 font-bold text-sm">تم إنشاء الحساب بنجاح وتخزينه في القاعدة!</div>
-                <div class="text-xs text-slate-300 bg-slate-900 p-2 rounded border border-slate-800 select-all" id="credentialsText"></div>
-                <div class="flex items-center justify-between gap-2">
-                    <button type="button" onclick="copyCredentials()" class="flex-1 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold py-2 px-3 rounded-lg text-sm transition flex items-center justify-center gap-2">
-                        <i class="fa-regular fa-copy"></i> نسخ المعلومات
-                    </button>
-                </div>
-                <p class="text-xs text-amber-400 font-medium">⚠️ احتفظ بمعلوماتك في مكان آمن!</p>
-                <button type="button" id="goToDashBtn" class="w-full mt-2 bg-slate-800 hover:bg-slate-700 text-white font-bold py-2 rounded-lg text-sm transition">الانتقال إلى لوحة التحكم</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- سكربت التحكم والتواصل مع السيرفر -->
-    <script>
-        function toggleTheme() {
-            const body = document.getElementById('bodyTag');
-            const icon = document.getElementById('themeIcon');
-            if (body.classList.contains('bg-slate-950')) {
-                body.classList.remove('bg-slate-950', 'text-slate-100');
-                body.classList.add('bg-slate-100', 'text-slate-900');
-                icon.classList.remove('fa-moon', 'text-amber-400');
-                icon.classList.add('fa-sun', 'text-orange-500');
-            } else {
-                body.classList.remove('bg-slate-100', 'text-slate-900');
-                body.classList.add('bg-slate-950', 'text-slate-100');
-                icon.classList.remove('fa-sun', 'text-orange-500');
-                icon.classList.add('fa-moon', 'text-amber-400');
-            }
-        }
-
-        function openModal(modalId) {
-            document.getElementById(modalId).classList.remove('hidden');
-            document.getElementById(modalId).classList.add('flex');
-        }
-
-        function closeModal(modalId) {
-            document.getElementById(modalId).classList.remove('flex');
-            document.getElementById(modalId).classList.add('hidden');
-            // إعادة تعيين نموذج التسجيل عند الإغلاق
-            document.getElementById('registerForm').classList.remove('hidden');
-            document.getElementById('successBox').classList.add('hidden');
-        }
-
-        // إرسال التسجيل للسيرفر وتخزينه في MongoDB
-        async function handleRegister(event) {
-            event.preventDefault();
-            const username = document.getElementById('regUsername').value;
-            const password = document.getElementById('regPassword').value;
-
-            try {
-                const res = await fetch('/api/register', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username, password })
-                });
-                const data = await res.json();
-
-                if (data.success) {
-                    document.getElementById('registerForm').classList.add('hidden');
-                    document.getElementById('credentialsText').innerText = `اسم المستخدم: ${username} | كلمة المرور: ${password}`;
-                    document.getElementById('successBox').classList.remove('hidden');
-                    
-                    // زر الانتقال للوحة التحكم مع الـ ID
-                    document.getElementById('goToDashBtn').onclick = () => {
-                        window.location.href = `dashboard.html?id=${data.userId}`;
-                    };
-                } else {
-                    alert(data.message || "حدث خطأ أثناء التسجيل");
-                }
-            } catch (err) {
-                alert("خطأ في الاتصال بالخادم");
-            }
-        }
-
-        // إرسال تسجيل الدخول للسيرفر والتحقق من MongoDB
-        async function handleLogin(event) {
-            event.preventDefault();
-            const username = document.getElementById('loginUsername').value;
-            const password = document.getElementById('loginPassword').value;
-
-            try {
-                const res = await fetch('/api/login', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username, password })
-                });
-                const data = await res.json();
-
-                if (data.success) {
-                    if (data.isAdmin) {
-                        window.location.href = 'admin.html';
-                    } else {
-                        window.location.href = `dashboard.html?id=${data.userId}`;
-                    }
-                } else {
-                    alert(data.message || "بيانات الدخول غير صحيحة");
-                }
-            } catch (err) {
-                alert("خطأ في الاتصال بالخادم");
-            }
-        }
-
-        // دالة نسخ المعلومات للحافظة
-        function copyCredentials() {
-            const text = document.getElementById('credentialsText').innerText;
-            navigator.clipboard.writeText(text).then(() => {
-                alert('تم نسخ المعلومات بنجاح!');
-            }).catch(err => {
-                console.error('Failed to copy text: ', err);
-            });
-        }
-
-        // دالة تسجيل الخروج من الواجهة الأمامية
-        function logoutUser() {
-            localStorage.removeItem('userId');
-            window.location.href = '/logout';
-        }
-    </script>
-</body>
-</html>
+<div class="bg-slate-900/60 border border-slate-800 hover:border-emerald-500/50 rounded-2xl p-6 transition shadow-xl">
+    <div class="text-slate-400 text-sm mb-1">الباقة القصوى</div>
+    <div class="text-2xl font-bold text-white mb-3">IP 500</div>
+    <div class="text-emerald-400 text-xl font-extrabold mb-6">USDT 170</div>
+    <button onclick="openModal('registerModal', 500)" class="w-full text-center bg-slate-800 hover:bg-emerald-500 hover:text-slate-950 text-white font-medium py-2.5 rounded-xl transition">
+        شراء الباقة
+    </button>
+</div>
